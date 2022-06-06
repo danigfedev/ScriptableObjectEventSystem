@@ -1,7 +1,7 @@
 # ScriptableObjectEventSystem
 This repo stores a custom Scriptable Object Event System, configured as a Unity package. It allows to create the necessary SOEvent-Listener script touple from Unity's Create menu
 
-#How to install
+## How to install
 
 <ol>
   <li>Copy repository's URL (the same you would use to clone it): https://github.com/danigfedev/ScriptableObjectEventSystem.git</li>
@@ -10,7 +10,12 @@ This repo stores a custom Scriptable Object Event System, configured as a Unity 
   <li>Wait until Unity imports package contents</li>
 </ol>
 
-#How to use
+## How to use
+
+1 - Open/Create the directory where you want to create your Scriptable Object events.
+2 - Right click to open Unity's Context Menu.
+3 - Click on Create/EspidiGames/SO Events / SO Event Creation Window
+![Create_SO_Event](https://user-images.githubusercontent.com/37219448/172149202-8f3d5cc9-7018-4c6f-8cd9-f3d7c86b25d8.png)
 
 <ol>
   <li>Open/Create the directory where you want to create your Scriptable Object events</li>
