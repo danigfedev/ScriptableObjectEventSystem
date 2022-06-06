@@ -18,7 +18,7 @@ This repo stores a custom Scriptable Object Event System, configured as a Unity 
 
 3 - Click on Create/EspidiGames/SO Events / SO Event Creation Window
 
-<img src="https://user-images.githubusercontent.com/37219448/172149202-8f3d5cc9-7018-4c6f-8cd9-f3d7c86b25d8.png" width="300">
+<img src="https://user-images.githubusercontent.com/37219448/172149202-8f3d5cc9-7018-4c6f-8cd9-f3d7c86b25d8.png" width="500">
 
 ![Create_SO_Event](https://user-images.githubusercontent.com/37219448/172149202-8f3d5cc9-7018-4c6f-8cd9-f3d7c86b25d8.png | width=100)
 
