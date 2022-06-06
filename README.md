@@ -22,10 +22,10 @@ This repo stores a custom Scriptable Object Event System, configured as a Unity 
 
 4 - A modal window will open. Select the options of your SO Event and hit "Create SO event scripts"
 
-
-<img src="https://user-images.githubusercontent.com/37219448/172149490-73e860f3-0dea-4ed8-95cf-88bed08cd600.png" width="500">
-
-<img src="https://user-images.githubusercontent.com/37219448/172149721-4dc95ec9-a5c1-459a-a585-307b175bac65.png" width="500">
+<p align="center">
+<img src="https://user-images.githubusercontent.com/37219448/172149490-73e860f3-0dea-4ed8-95cf-88bed08cd600.png" width="300">
+  <img src="https://user-images.githubusercontent.com/37219448/172149721-4dc95ec9-a5c1-459a-a585-307b175bac65.png" width="300">
+<br>  
 
 5 - Wait for script creation. After a few seconds, two scripts will appear on your selected directory.
 
@@ -36,6 +36,3 @@ This repo stores a custom Scriptable Object Event System, configured as a Unity 
 
 <img src="https://user-images.githubusercontent.com/37219448/172150179-0484e88b-f24a-49d0-bd5a-c37f31bacdb7.png" width="500">
 
-Testing image
-
-![imagen](https://user-images.githubusercontent.com/37219448/172150179-0484e88b-f24a-49d0-bd5a-c37f31bacdb7.png)
