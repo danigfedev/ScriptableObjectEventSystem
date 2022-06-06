@@ -25,3 +25,5 @@ This repo stores a custom Scriptable Object Event System, configured as a Unity 
   <li>Now you can create Scriptable objects of the created type from the same menu</li>
   ![imagen](https://user-images.githubusercontent.com/37219448/172150179-0484e88b-f24a-49d0-bd5a-c37f31bacdb7.png)
 </ol>
+
+![imagen](https://user-images.githubusercontent.com/37219448/172150179-0484e88b-f24a-49d0-bd5a-c37f31bacdb7.png)
