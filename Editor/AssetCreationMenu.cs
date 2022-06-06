@@ -8,8 +8,8 @@ using Unity.EditorCoroutines.Editor;
 
 public class AssetCreationMenu : Editor
 {
-    //private const string packageRelativePath= "Assets/EspidiGames/ScriptableObjectEventSystem/";
-    private const string packageRelativePath= "Packages/com.espidigames.scriptable-object-event-system/";
+    //private const string packageRelativePath = "Assets/EspidiGames/ScriptableObjectEventSystem/";// Use this to test functionality if developing new features
+    private const string packageRelativePath = "Packages/com.espidigames.scriptable-object-event-system/"; //Release path to work from packages directory
 
     private const string eventIconRelativepath = "/Icons/event.png";
     private const string eventListenerIconRelativePath = "/Icons/listener.png";

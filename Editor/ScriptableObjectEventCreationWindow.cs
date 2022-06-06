@@ -31,6 +31,10 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
         ScriptableObjectEventCreationWindow window =
             EditorWindow.GetWindow<ScriptableObjectEventCreationWindow>(true, "Select Randomized Selected Objects");
 
+        Vector2 windowDimensions = new Vector2(300, 400);
+        window.minSize = windowDimensions;
+        window.maxSize = windowDimensions;
+
         window.argsToggle[(int)ToggleIndices.NoArgs] = true;
         window.argsToggle_prev[(int)ToggleIndices.NoArgs] = true;
         window.currentActiveToggle = ToggleIndices.NoArgs;
@@ -52,7 +56,7 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
 
     void OnGUI()
     {
-        useTypeAsName = EditorGUILayout.ToggleLeft("Use Type as name", useTypeAsName);
+        useTypeAsName = EditorGUILayout.ToggleLeft("Use argument Type as name", useTypeAsName);
         if (argsToggle[(int)ToggleIndices.Custom])
         {
             EditorGUILayout.HelpBox($"Custom type is selected. It is recommended to add a custom name manually.", MessageType.Warning);
@@ -92,7 +96,9 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
         EditorGUILayout.HelpBox($"Help box \n{eventSOname}.cs\n{eventListenername}.cs", MessageType.None);
 
         //Creation button:
-        EditorGUILayout.Space(20);
+        //EditorGUILayout.Space(20);
+        GUILayout.FlexibleSpace();
+
 
         if (GUILayout.Button("Create SO event scripts"))
         {
