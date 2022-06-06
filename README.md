@@ -22,7 +22,7 @@ This repo stores a custom Scriptable Object Event System, configured as a Unity 
 
 4 - A modal window will open. Select the options of your SO Event and hit "Create SO event scripts"
 
-<p align="center">
+<p align="left">
 <img src="https://user-images.githubusercontent.com/37219448/172149490-73e860f3-0dea-4ed8-95cf-88bed08cd600.png" width="300">
   <img src="https://user-images.githubusercontent.com/37219448/172149721-4dc95ec9-a5c1-459a-a585-307b175bac65.png" width="300">
 <br>  
