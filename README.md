@@ -13,8 +13,11 @@ This repo stores a custom Scriptable Object Event System, configured as a Unity 
 ## How to use
 
 1 - Open/Create the directory where you want to create your Scriptable Object events.
+
 2 - Right click to open Unity's Context Menu.
+
 3 - Click on Create/EspidiGames/SO Events / SO Event Creation Window
+
 ![Create_SO_Event](https://user-images.githubusercontent.com/37219448/172149202-8f3d5cc9-7018-4c6f-8cd9-f3d7c86b25d8.png)
 
 <ol>
