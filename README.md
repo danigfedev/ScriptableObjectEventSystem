@@ -29,7 +29,7 @@ This repo stores a custom Scriptable Object Event System, configured as a Unity 
 
 5 - Wait for script creation. After a few seconds, two scripts will appear on your selected directory.
 
-<img src="https://user-images.githubusercontent.com/37219448/172150009-a127ce75-9767-47ee-a131-411651dbf7cf.png" width="500">
+<img src="https://user-images.githubusercontent.com/37219448/172150009-a127ce75-9767-47ee-a131-411651dbf7cf.png" width="300">
 
 
 6 - Now you can create Scriptable objects of the created type from the same menu.
