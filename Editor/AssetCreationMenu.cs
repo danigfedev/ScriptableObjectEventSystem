@@ -8,8 +8,7 @@ using Unity.EditorCoroutines.Editor;
 
 public class AssetCreationMenu : Editor
 {
-    //private const string packageRelativePath = "Assets/EspidiGames/ScriptableObjectEventSystem/";// Use this to test functionality if developing new features
-    private const string PackageRelativePath = "Packages/com.espidigames.scriptable-object-event-system/"; //Release path to work from packages directory
+    private const string PackageRelativePathPattern = "Packages/{0}/";
 
     private const string EventIconRelativepath = "/Icons/event.png";
     private const string EventListenerIconRelativePath = "/Icons/listener.png";
@@ -20,6 +19,8 @@ public class AssetCreationMenu : Editor
     private const string GenericSOEventListenerTemplatePath = "/CustomScriptTemplates/GenericSOEventListenerTemplate.txt";
     private const string NoArgsSOEventListenerTemplatePath = "/CustomScriptTemplates/NoArgsSOEventListenerTemplate.txt";
     
+    private static string _packageRelativePath;
+    
     private class IconReplacementClass : Editor
     {
         public IEnumerator AddIcon(string scriptPath, string iconName)
@@ -27,37 +28,37 @@ public class AssetCreationMenu : Editor
             AssetDatabase.Refresh();
 
             yield return null; //Wait just for one editor frame
-            // //Wait just for one editor frame
             // yield return new EditorWaitForSeconds(0.1f); // hardcoded waiting time
 
             var monoImporter = AssetImporter.GetAtPath(scriptPath) as MonoImporter;
-            var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(PackageRelativePath + iconName);
+            var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(_packageRelativePath + iconName);
             monoImporter.SetIcon(icon);
             monoImporter.SaveAndReimport();
         }
     }
 
     [MenuItem("Assets/Create/EspidiGames/SO Events/So Event Creation Window", false, 0)]
-    static void OpenScriptalbeObjectEventCreationWindow()
+    static void OpenScriptableObjectEventCreationWindow()
     {
+        SetPackageName();
         ScriptableObjectEventCreationWindow.OpenWindow();
     }
 
-    public static void CreateSOEventScripts(string eventSOname, string eventListenername, string[] args)//pass parameters from window
+    public static void CreateSOEventScripts(string eventSOName, string eventListenerName, string[] args)//pass parameters from window
     {
         //Picking the first one by default.
-        //This will return the selected items' path, or the directoyr path, if no assets are selected
-        string selectionGUID= Selection.assetGUIDs[0];
-        string creationPath = AssetDatabase.GUIDToAssetPath(selectionGUID);
+        //This will return the selected items' path, or the directory path, if no assets are selected
+        var selectionGUID= Selection.assetGUIDs[0];
+        var creationPath = AssetDatabase.GUIDToAssetPath(selectionGUID);
 
         //Checking whether the selection is a file or directory
-        FileAttributes fileAttributes = File.GetAttributes(creationPath);
+        var fileAttributes = File.GetAttributes(creationPath);
 
-        bool isDirectory = (fileAttributes & FileAttributes.Directory) == FileAttributes.Directory;
+        var isDirectory = (fileAttributes & FileAttributes.Directory) == FileAttributes.Directory;
 
         if (!isDirectory)
         {
-            FileInfo fileInfo = new FileInfo(creationPath);
+            var fileInfo = new FileInfo(creationPath);
             creationPath = fileInfo.Directory.ToString(); //This returns the full path C://path to project/Assets/...
         }
         else
@@ -74,10 +75,10 @@ public class AssetCreationMenu : Editor
         //Loading the template text file which has some code already in it.
         //Note that the text file is stored in the path PROJECT_NAME/Assets/CharacterTemplate.txt
 
-        string[] eventArgs = GenerateEventArguments(args);
+        var eventArgs = GenerateEventArguments(args);
 
-        CreateSOEventScript(creationPath, eventSOname, eventListenername, eventArgs);
-        CreateSOEventListenerScript(creationPath, eventSOname, eventListenername, eventArgs);
+        CreateSOEventScript(creationPath, eventSOName, eventListenerName, eventArgs);
+        CreateSOEventListenerScript(creationPath, eventSOName, eventListenerName, eventArgs);
 
         //Refresh the Asset Database
         AssetDatabase.Refresh();
@@ -89,12 +90,12 @@ public class AssetCreationMenu : Editor
         TextAsset soEventTemplate;
         if (argTypes!= null)
         {
-            soEventTemplate = AssetDatabase.LoadAssetAtPath(PackageRelativePath 
+            soEventTemplate = AssetDatabase.LoadAssetAtPath(_packageRelativePath 
                 + GenericSOEventTemplatePath, typeof(TextAsset)) as TextAsset;
         }
         else
         {
-            soEventTemplate = AssetDatabase.LoadAssetAtPath(PackageRelativePath 
+            soEventTemplate = AssetDatabase.LoadAssetAtPath(_packageRelativePath 
                 + NoArgsSOEventTemplatePath, typeof(TextAsset)) as TextAsset;
         }
 
@@ -127,7 +128,6 @@ public class AssetCreationMenu : Editor
         EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, EventIconRelativepath));
 
     }
-    
 
     private static void CreateSOEventListenerScript(string creationPath, string eventName, string listenerName, string[] argTypes)
     {
@@ -135,13 +135,13 @@ public class AssetCreationMenu : Editor
         TextAsset soEventListenerTemplate;
         if (argTypes != null)
         {
-            soEventListenerTemplate = AssetDatabase.LoadAssetAtPath(PackageRelativePath 
+            soEventListenerTemplate = AssetDatabase.LoadAssetAtPath(_packageRelativePath 
                 + GenericSOEventListenerTemplatePath, typeof(TextAsset)) as TextAsset;
 
         }
         else
         {
-            soEventListenerTemplate = AssetDatabase.LoadAssetAtPath(PackageRelativePath 
+            soEventListenerTemplate = AssetDatabase.LoadAssetAtPath(_packageRelativePath 
                 + NoArgsSOEventListenerTemplatePath, typeof(TextAsset)) as TextAsset;
         }
 
@@ -248,5 +248,12 @@ public class AssetCreationMenu : Editor
         }
 
         return sb.ToString();
+    }
+    
+    private static void SetPackageName()
+    {
+        var assembly = typeof(AssetCreationMenu).Assembly;
+        var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssembly(assembly);
+        _packageRelativePath = string.Format(PackageRelativePathPattern, packageInfo.name);
     }
 }

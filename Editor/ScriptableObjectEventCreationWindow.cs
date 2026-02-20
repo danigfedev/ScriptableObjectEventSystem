@@ -15,15 +15,18 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
         Custom
     }
 
+    private const string EventSONamePattern = "SO{0}Event";
+    private const string EventListenerNamePattern = "SO{0}EventListener";
+    
     private bool _useTypeAsName = false;
     private bool[] _argsToggle = new bool[6];
     private bool[] _argsTogglePreviousState = new bool[6];
-    private ToggleIndices currentActiveToggle;
-
-    string eventName = "";
-    string customTypes = "";
-
-    //[MenuItem("Assets/Create/EspidiGames/SO Events/So Event Creation Window TEST", false, 0)]
+    private ToggleIndices _currentActiveToggle;
+    private string _eventName = "";
+    private string customTypes = "";
+    private string _eventSOName;
+    private string _eventListenerName;
+    
     public static void OpenWindow()
     {
         //Calling this opens window normally (non-modal)
@@ -35,7 +38,7 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
 
         window._argsToggle[(int)ToggleIndices.NoArgs] = true;
         window._argsTogglePreviousState[(int)ToggleIndices.NoArgs] = true;
-        window.currentActiveToggle = ToggleIndices.NoArgs;
+        window._currentActiveToggle = ToggleIndices.NoArgs;
 
         EditorCoroutineUtility.StartCoroutineOwnerless(window.MakeWindowModal());
     }
@@ -55,18 +58,38 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
 
     private void OnGUI()
     {
+        RenderEventNameSection();
+        EditorGUILayout.Space(20);
+        RenderArgumentsToggleSection();
+        UpdateToggles();
+        EditorGUILayout.Space(20);
+        RenderOutputFilesSection();
+        GUILayout.FlexibleSpace();
+        RenderCreateAssetsButton();
+    }
+    
+    void OnInspectorUpdate()
+    {
+        Repaint();
+    }
+
+    private void RenderEventNameSection()
+    {
         _useTypeAsName = EditorGUILayout.ToggleLeft("Use argument Type as name", _useTypeAsName);
+        
         if (_argsToggle[(int)ToggleIndices.Custom])
         {
             EditorGUILayout.HelpBox($"Custom type is selected. It is recommended to add a custom name manually.", MessageType.Warning);
         }
-        eventName = EditorGUILayout.TextField("Event name:", eventName);
-
-        EditorGUILayout.Space(20);
+        
+        _eventName = EditorGUILayout.TextField("Event name:", _eventName);
+    }
+    
+    private void RenderArgumentsToggleSection()
+    {
         EditorGUILayout.LabelField("Event Arguments");
         EditorGUILayout.Space(5);
-
-        //Toggle group behaviour: only one active simultaneously
+        
         _argsToggle[(int)ToggleIndices.NoArgs] = EditorGUILayout.ToggleLeft("No Argument", _argsToggle[(int)ToggleIndices.NoArgs]);
         _argsToggle[(int)ToggleIndices.Int] = EditorGUILayout.ToggleLeft("int", _argsToggle[(int)ToggleIndices.Int]);
         _argsToggle[(int)ToggleIndices.Float] = EditorGUILayout.ToggleLeft("float", _argsToggle[(int)ToggleIndices.Float]);
@@ -78,51 +101,45 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
         {
             customTypes = EditorGUILayout.TextField("Arguments (T1,T2,...TN):", customTypes);
         }
-
-        UpdateToggles();
-
-        EditorGUILayout.Space(20);
-
-        //Showing a preview of the scripts that will be generated (script names + extension (.cs)
+    }
+    
+    private void RenderOutputFilesSection()
+    {
         if(_useTypeAsName && !_argsToggle[(int)ToggleIndices.Custom])
         {
-            eventName = currentActiveToggle.ToString();
+            _eventName = _currentActiveToggle.ToString();
         }
         
-        string eventSOname = "SO" + eventName + "Event";
-        string eventListenername = "SO" + eventName + "EventListener";
-        EditorGUILayout.HelpBox($"Output files: - \n{eventSOname}.cs\n - {eventListenername}.cs", MessageType.None);
-
-        //Creation button:
-        //EditorGUILayout.Space(20);
-        GUILayout.FlexibleSpace();
-
+        _eventSOName = string.Format(EventSONamePattern, _eventName);
+        _eventListenerName = string.Format(EventListenerNamePattern, _eventName);
+        
+        EditorGUILayout.HelpBox($"Output files: \n\n" +
+                                $"- {_eventSOName}.cs\n" +
+                                $"- {_eventListenerName}.cs", MessageType.None);
+    }
+    
+    private void RenderCreateAssetsButton()
+    {
         if (GUILayout.Button("Create SO event scripts"))
         {
             string[] args = null;
 
-            if(currentActiveToggle != ToggleIndices.Custom 
-                && currentActiveToggle != ToggleIndices.NoArgs)
+            if(_currentActiveToggle != ToggleIndices.Custom 
+               && _currentActiveToggle != ToggleIndices.NoArgs)
             {
                 args = new string[1];
-                args[0] = currentActiveToggle.ToString().ToLower();
+                args[0] = _currentActiveToggle.ToString().ToLower();
             }
-            else if(currentActiveToggle == ToggleIndices.Custom)
+            else if(_currentActiveToggle == ToggleIndices.Custom)
             {
-                Debug.Log($"Custom types: "+customTypes);
+                Debug.Log($"Custom types: " + customTypes);
                 args = customTypes.Split(',');
             }
 
-            AssetCreationMenu.CreateSOEventScripts(eventSOname, eventListenername, args);
+            AssetCreationMenu.CreateSOEventScripts(_eventSOName, _eventListenerName, args);
 
             Close();
         }
-            
-    }
-    
-    void OnInspectorUpdate()
-    {
-        Repaint();
     }
 
     private void UpdateToggles()
@@ -131,7 +148,7 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
         {
             if (_argsToggle[i] != _argsTogglePreviousState[i] && _argsToggle[i]) //Toggle changed from false to true
             {
-                currentActiveToggle = (ToggleIndices)i;
+                _currentActiveToggle = (ToggleIndices)i;
                 ClearTogglesExceptIndex(i);
                 break;
             }
