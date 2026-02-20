@@ -9,35 +9,29 @@ using Unity.EditorCoroutines.Editor;
 public class AssetCreationMenu : Editor
 {
     //private const string packageRelativePath = "Assets/EspidiGames/ScriptableObjectEventSystem/";// Use this to test functionality if developing new features
-    private const string packageRelativePath = "Packages/com.espidigames.scriptable-object-event-system/"; //Release path to work from packages directory
+    private const string PackageRelativePath = "Packages/com.espidigames.scriptable-object-event-system/"; //Release path to work from packages directory
 
-    private const string eventIconRelativepath = "/Icons/event.png";
-    private const string eventListenerIconRelativePath = "/Icons/listener.png";
+    private const string EventIconRelativepath = "/Icons/event.png";
+    private const string EventListenerIconRelativePath = "/Icons/listener.png";
 
-    private const string genericSOEventTemplatePath = "/CustomScriptTemplates/GenericSOEventTemplate.txt";
-    private const string noArgsSOEventTemplatePath = "/CustomScriptTemplates/NoArgsSOEventTemplate.txt";
+    private const string GenericSOEventTemplatePath = "/CustomScriptTemplates/GenericSOEventTemplate.txt";
+    private const string NoArgsSOEventTemplatePath = "/CustomScriptTemplates/NoArgsSOEventTemplate.txt";
 
-    private const string genericSOEventListenerTemplatePath = "/CustomScriptTemplates/GenericSOEventListenerTemplate.txt";
+    private const string GenericSOEventListenerTemplatePath = "/CustomScriptTemplates/GenericSOEventListenerTemplate.txt";
     private const string NoArgsSOEventListenerTemplatePath = "/CustomScriptTemplates/NoArgsSOEventListenerTemplate.txt";
-
     
-        
-
-
-    //Nested class that handles script's icon modification
     private class IconReplacementClass : Editor
     {
         public IEnumerator AddIcon(string scriptPath, string iconName)
         {
-            //string scriptPath = "Assets/EspidiGamesScriptTemplates/" + scriptName;
             AssetDatabase.Refresh();
 
-            //Wait just for one editor frame
-            yield return new EditorWaitForSeconds(0.1f); // hardcoded waiting time
+            yield return null; //Wait just for one editor frame
+            // //Wait just for one editor frame
+            // yield return new EditorWaitForSeconds(0.1f); // hardcoded waiting time
 
             var monoImporter = AssetImporter.GetAtPath(scriptPath) as MonoImporter;
-            //var monoScript = monoImporter.GetScript();
-            var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(packageRelativePath + iconName);
+            var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(PackageRelativePath + iconName);
             monoImporter.SetIcon(icon);
             monoImporter.SaveAndReimport();
         }
@@ -95,13 +89,13 @@ public class AssetCreationMenu : Editor
         TextAsset soEventTemplate;
         if (argTypes!= null)
         {
-            soEventTemplate = AssetDatabase.LoadAssetAtPath(packageRelativePath 
-                + genericSOEventTemplatePath, typeof(TextAsset)) as TextAsset;
+            soEventTemplate = AssetDatabase.LoadAssetAtPath(PackageRelativePath 
+                + GenericSOEventTemplatePath, typeof(TextAsset)) as TextAsset;
         }
         else
         {
-            soEventTemplate = AssetDatabase.LoadAssetAtPath(packageRelativePath 
-                + noArgsSOEventTemplatePath, typeof(TextAsset)) as TextAsset;
+            soEventTemplate = AssetDatabase.LoadAssetAtPath(PackageRelativePath 
+                + NoArgsSOEventTemplatePath, typeof(TextAsset)) as TextAsset;
         }
 
         //2-Check loaded object validity. If not valid, abort execution
@@ -130,7 +124,7 @@ public class AssetCreationMenu : Editor
         //5-Add Custom Icon:
         string filePathInProject = GetPathInProjectAssets(filePath);
         var iconClass = new IconReplacementClass();
-        EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, eventIconRelativepath));
+        EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, EventIconRelativepath));
 
     }
     
@@ -141,13 +135,13 @@ public class AssetCreationMenu : Editor
         TextAsset soEventListenerTemplate;
         if (argTypes != null)
         {
-            soEventListenerTemplate = AssetDatabase.LoadAssetAtPath(packageRelativePath 
-                + genericSOEventListenerTemplatePath, typeof(TextAsset)) as TextAsset;
+            soEventListenerTemplate = AssetDatabase.LoadAssetAtPath(PackageRelativePath 
+                + GenericSOEventListenerTemplatePath, typeof(TextAsset)) as TextAsset;
 
         }
         else
         {
-            soEventListenerTemplate = AssetDatabase.LoadAssetAtPath(packageRelativePath 
+            soEventListenerTemplate = AssetDatabase.LoadAssetAtPath(PackageRelativePath 
                 + NoArgsSOEventListenerTemplatePath, typeof(TextAsset)) as TextAsset;
         }
 
@@ -178,7 +172,7 @@ public class AssetCreationMenu : Editor
         //5-Add Custom Icon:
         string filePathInProject = GetPathInProjectAssets(filePath);
         var iconClass = new IconReplacementClass();
-        EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, eventListenerIconRelativePath));
+        EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, EventListenerIconRelativePath));
     }
 
     private static string[] GenerateEventArguments(string[] argTypes)
@@ -190,7 +184,7 @@ public class AssetCreationMenu : Editor
             return null;
         }
 
-            StringBuilder sb_definitions = new StringBuilder();
+        StringBuilder sb_definitions = new StringBuilder();
         StringBuilder sb_argList = new StringBuilder();
         StringBuilder sb_typeList = new StringBuilder();
         int argCount = 1;
@@ -229,7 +223,6 @@ public class AssetCreationMenu : Editor
 
         return result;
     }
-
     
     private static string GetPathInProjectAssets(string fullPath)
     {
@@ -256,5 +249,4 @@ public class AssetCreationMenu : Editor
 
         return sb.ToString();
     }
-
 }

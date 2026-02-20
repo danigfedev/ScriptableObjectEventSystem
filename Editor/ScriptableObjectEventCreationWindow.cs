@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
@@ -6,7 +5,7 @@ using UnityEngine;
 
 public class ScriptableObjectEventCreationWindow : EditorWindow
 {
-    enum ToggleIndices
+    private enum ToggleIndices
     {
         NoArgs = 0,
         Int,
@@ -16,10 +15,10 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
         Custom
     }
 
-    bool useTypeAsName = false;
-    bool[] argsToggle = new bool[6];
-    bool[] argsToggle_prev = new bool[6];
-    ToggleIndices currentActiveToggle;
+    private bool _useTypeAsName = false;
+    private bool[] _argsToggle = new bool[6];
+    private bool[] _argsTogglePreviousState = new bool[6];
+    private ToggleIndices currentActiveToggle;
 
     string eventName = "";
     string customTypes = "";
@@ -28,55 +27,54 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
     public static void OpenWindow()
     {
         //Calling this opens window normally (non-modal)
-        ScriptableObjectEventCreationWindow window =
-            EditorWindow.GetWindow<ScriptableObjectEventCreationWindow>(true, "Select Randomized Selected Objects");
+        var window = GetWindow<ScriptableObjectEventCreationWindow>(true, "Select Randomized Selected Objects");
 
-        Vector2 windowDimensions = new Vector2(300, 400);
+        var windowDimensions = new Vector2(300, 400);
         window.minSize = windowDimensions;
         window.maxSize = windowDimensions;
 
-        window.argsToggle[(int)ToggleIndices.NoArgs] = true;
-        window.argsToggle_prev[(int)ToggleIndices.NoArgs] = true;
+        window._argsToggle[(int)ToggleIndices.NoArgs] = true;
+        window._argsTogglePreviousState[(int)ToggleIndices.NoArgs] = true;
         window.currentActiveToggle = ToggleIndices.NoArgs;
 
         EditorCoroutineUtility.StartCoroutineOwnerless(window.MakeWindowModal());
     }
 
-    //Coroutine that skips one editor frame and then makes Window modal.
-    //Necessary to open window from Project panel (right click -> Create/EspidiGames/SO Events / Open window)
-    //For whatever reason, opening from that context menu left the window completely blank
-    //(it was working from unity menus though))
-    public IEnumerator MakeWindowModal()
+    /// <summary>
+    /// Coroutine that skips one editor frame and then makes Window modal.
+    /// Necessary to open window from Project panel (right click -> Create/EspidiGames/SO Events / Open window)
+    ///For whatever reason, opening from that context menu left the window completely blank
+    /// (it was working from unity menus though))
+    /// </summary>
+    private IEnumerator MakeWindowModal()
     {
-        //Wait just for one editor frame
-        yield return null;// new EditorWaitForSeconds(0.25f);
+        yield return null; //Wait just for one editor frame
 
         this.ShowModalUtility();
     }
 
-    void OnGUI()
+    private void OnGUI()
     {
-        useTypeAsName = EditorGUILayout.ToggleLeft("Use argument Type as name", useTypeAsName);
-        if (argsToggle[(int)ToggleIndices.Custom])
+        _useTypeAsName = EditorGUILayout.ToggleLeft("Use argument Type as name", _useTypeAsName);
+        if (_argsToggle[(int)ToggleIndices.Custom])
         {
             EditorGUILayout.HelpBox($"Custom type is selected. It is recommended to add a custom name manually.", MessageType.Warning);
         }
         eventName = EditorGUILayout.TextField("Event name:", eventName);
-        
 
         EditorGUILayout.Space(20);
         EditorGUILayout.LabelField("Event Arguments");
         EditorGUILayout.Space(5);
 
         //Toggle group behaviour: only one active simultaneously
-        argsToggle[(int)ToggleIndices.NoArgs] = EditorGUILayout.ToggleLeft("No Argument", argsToggle[(int)ToggleIndices.NoArgs]);
-        argsToggle[(int)ToggleIndices.Int] = EditorGUILayout.ToggleLeft("int", argsToggle[(int)ToggleIndices.Int]);
-        argsToggle[(int)ToggleIndices.Float] = EditorGUILayout.ToggleLeft("float", argsToggle[(int)ToggleIndices.Float]);
-        argsToggle[(int)ToggleIndices.Bool]= EditorGUILayout.ToggleLeft("bool", argsToggle[(int)ToggleIndices.Bool]);
-        argsToggle[(int)ToggleIndices.String]=EditorGUILayout.ToggleLeft("string", argsToggle[(int)ToggleIndices.String]);
-        argsToggle[(int)ToggleIndices.Custom] = EditorGUILayout.ToggleLeft("Custom args", argsToggle[(int)ToggleIndices.Custom]);
+        _argsToggle[(int)ToggleIndices.NoArgs] = EditorGUILayout.ToggleLeft("No Argument", _argsToggle[(int)ToggleIndices.NoArgs]);
+        _argsToggle[(int)ToggleIndices.Int] = EditorGUILayout.ToggleLeft("int", _argsToggle[(int)ToggleIndices.Int]);
+        _argsToggle[(int)ToggleIndices.Float] = EditorGUILayout.ToggleLeft("float", _argsToggle[(int)ToggleIndices.Float]);
+        _argsToggle[(int)ToggleIndices.Bool]= EditorGUILayout.ToggleLeft("bool", _argsToggle[(int)ToggleIndices.Bool]);
+        _argsToggle[(int)ToggleIndices.String]=EditorGUILayout.ToggleLeft("string", _argsToggle[(int)ToggleIndices.String]);
+        _argsToggle[(int)ToggleIndices.Custom] = EditorGUILayout.ToggleLeft("Custom args", _argsToggle[(int)ToggleIndices.Custom]);
         
-        if (argsToggle[(int)ToggleIndices.Custom])
+        if (_argsToggle[(int)ToggleIndices.Custom])
         {
             customTypes = EditorGUILayout.TextField("Arguments (T1,T2,...TN):", customTypes);
         }
@@ -86,19 +84,18 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
         EditorGUILayout.Space(20);
 
         //Showing a preview of the scripts that will be generated (script names + extension (.cs)
-        if(useTypeAsName && !argsToggle[(int)ToggleIndices.Custom])
+        if(_useTypeAsName && !_argsToggle[(int)ToggleIndices.Custom])
         {
             eventName = currentActiveToggle.ToString();
         }
         
         string eventSOname = "SO" + eventName + "Event";
         string eventListenername = "SO" + eventName + "EventListener";
-        EditorGUILayout.HelpBox($"Help box \n{eventSOname}.cs\n{eventListenername}.cs", MessageType.None);
+        EditorGUILayout.HelpBox($"Output files: - \n{eventSOname}.cs\n - {eventListenername}.cs", MessageType.None);
 
         //Creation button:
         //EditorGUILayout.Space(20);
         GUILayout.FlexibleSpace();
-
 
         if (GUILayout.Button("Create SO event scripts"))
         {
@@ -108,7 +105,7 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
                 && currentActiveToggle != ToggleIndices.NoArgs)
             {
                 args = new string[1];
-                args[0] = currentActiveToggle.ToString().ToLower(); ;
+                args[0] = currentActiveToggle.ToString().ToLower();
             }
             else if(currentActiveToggle == ToggleIndices.Custom)
             {
@@ -122,43 +119,43 @@ public class ScriptableObjectEventCreationWindow : EditorWindow
         }
             
     }
+    
+    void OnInspectorUpdate()
+    {
+        Repaint();
+    }
 
     private void UpdateToggles()
     {
-        for(int i=0; i < argsToggle.Length; i++)
+        for(int i=0; i < _argsToggle.Length; i++)
         {
-            if (argsToggle[i] != argsToggle_prev[i] && argsToggle[i]) //Toggle changed from false to true
+            if (_argsToggle[i] != _argsTogglePreviousState[i] && _argsToggle[i]) //Toggle changed from false to true
             {
                 currentActiveToggle = (ToggleIndices)i;
                 ClearTogglesExceptIndex(i);
                 break;
             }
-            else if(argsToggle[i] != argsToggle_prev[i] && !argsToggle[i]) //toggle changed from true to false
+            else if(_argsToggle[i] != _argsTogglePreviousState[i] && !_argsToggle[i]) //toggle changed from true to false
             {
-                argsToggle[i] = true;
+                _argsToggle[i] = true;
             }
         }
 
         //Update previous status:
-        for (int i = 0; i < argsToggle.Length; i++)
+        for (int i = 0; i < _argsToggle.Length; i++)
         {
-            argsToggle_prev[i] = argsToggle[i];
+            _argsTogglePreviousState[i] = _argsToggle[i];
         }
     }
 
     private void ClearTogglesExceptIndex(int skipIndex)
     {
-        for (int i = 0; i < argsToggle.Length; i++)
+        for (int i = 0; i < _argsToggle.Length; i++)
         {
             if(i!= skipIndex)
             {
-                argsToggle[i] = false;
+                _argsToggle[i] = false;
             }
         }
-    }
-
-    void OnInspectorUpdate()
-    {
-        Repaint();
     }
 }
