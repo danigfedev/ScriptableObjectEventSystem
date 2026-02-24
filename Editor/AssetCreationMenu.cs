@@ -105,7 +105,7 @@ namespace EG.ScriptableObjectSystem.Editor
             Assert.IsTrue(soEventTemplate != null, "[AssetCreation] SOEventTemplate loading failed. Aborting");
 
             //3-Complete template replacing placeholders with corresponding data
-            string contents = soEventTemplate.text;
+            var contents = soEventTemplate.text;
 
             contents = contents.Replace("<SCRIPT_NAME>", eventName);
             contents = contents.Replace("<SO_FILE_NAME>", eventName);
@@ -115,20 +115,20 @@ namespace EG.ScriptableObjectSystem.Editor
             if(argTypes != null){
                 contents = contents.Replace("<ARGUMENT_LIST_DEFINITION>", argTypes[0]);
                 contents = contents.Replace("<ARGUMENT_LIST>", argTypes[1]);
+                contents = contents.Replace("<CUSTOM_NAMESPACE_LIST>", argTypes[3]);
             }
 
             //4-Create file
-            string filePath = creationPath + Path.DirectorySeparatorChar + eventName + ".cs";
-            using (StreamWriter sw = new StreamWriter(string.Format(filePath)))
+            var filePath = creationPath + Path.DirectorySeparatorChar + eventName + ".cs";
+            using (var sw = new StreamWriter(string.Format(filePath)))
             {
                 sw.Write(contents);
             }
 
             //5-Add Custom Icon:
-            string filePathInProject = GetPathInProjectAssets(filePath);
+            var filePathInProject = GetPathInProjectAssets(filePath);
             var iconClass = new IconReplacementClass();
             EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, EventIconRelativepath));
-
         }
 
         private static void CreateSOEventListenerScript(string creationPath, string eventName, string listenerName, string[] argTypes)
@@ -151,7 +151,7 @@ namespace EG.ScriptableObjectSystem.Editor
             Assert.IsTrue(soEventListenerTemplate != null, "[AssetCreation] SOEventTemplate loading failed. Aborting");
 
             //3-Complete template replacing placeholders with corresponding data
-            string contents = soEventListenerTemplate.text;
+            var contents = soEventListenerTemplate.text;
 
             contents = contents.Replace("<SCRIPT_NAME>", listenerName);
             contents = contents.Replace("<SO_EVENT_NAME>", eventName);
@@ -161,34 +161,36 @@ namespace EG.ScriptableObjectSystem.Editor
                 contents = contents.Replace("<ARGUMENT_LIST_DEFINITION>", argTypes[0]);
                 contents = contents.Replace("<ARGUMENT_LIST>", argTypes[1]);
                 contents = contents.Replace("<ARGUMENT_TYPE_LIST>", argTypes[2]);
+                contents = contents.Replace("<CUSTOM_NAMESPACE_LIST>", argTypes[3]);
             }
 
             //4-Create file
-            string filePath = creationPath + Path.DirectorySeparatorChar + listenerName + ".cs";
-            using (StreamWriter sw = new StreamWriter(string.Format(filePath)))
-            //using (StreamWriter sw = new StreamWriter(string.Format(creationPath + Path.DirectorySeparatorChar + listenerName + ".cs")))
+            var filePath = creationPath + Path.DirectorySeparatorChar + listenerName + ".cs";
+            using (var sw = new StreamWriter(string.Format(filePath)))
             {
                 sw.Write(contents);
             }
 
             //5-Add Custom Icon:
-            string filePathInProject = GetPathInProjectAssets(filePath);
+            var filePathInProject = GetPathInProjectAssets(filePath);
             var iconClass = new IconReplacementClass();
             EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, EventListenerIconRelativePath));
         }
 
         private static string[] GenerateEventArguments(ArgInfo[] argsList)
         {
-            string[] result = new string[3];
+            var result = new string[4];
 
             if (argsList == null || argsList.Length == 0)
             {
                 return null;
             }
 
-            StringBuilder sb_definitions = new StringBuilder();
-            StringBuilder sb_argList = new StringBuilder();
-            StringBuilder sb_typeList = new StringBuilder();
+            var sb_definitions = new StringBuilder();
+            var sb_argList = new StringBuilder();
+            var sb_typeList = new StringBuilder();
+            var sb_namespaceList = new StringBuilder();
+            
             var argCount = 1;
             
             foreach (var argInfo in argsList)
@@ -197,23 +199,26 @@ namespace EG.ScriptableObjectSystem.Editor
                 sb_definitions.Append(argInfo.ArgType);
                 sb_definitions.Append(" arg");
                 sb_definitions.Append(argCount);
-                if (argCount < argsList.Length)
-                {
-                    sb_definitions.Append(",");
-                }
-
+                
                 //arg list:
                 sb_argList.Append("arg");
                 sb_argList.Append(argCount);
-                if (argCount < argsList.Length)
-                {
-                    sb_argList.Append(",");
-                }
-
+                
                 //type list:
                 sb_typeList.Append(argInfo.ArgType);
+                
+                //namespace list
+                if (argInfo.SupportedType == EventSupportedArgs.Custom 
+                    && !string.IsNullOrWhiteSpace(argInfo.ArgNamespace) 
+                    && !sb_namespaceList.ToString().Contains(argInfo.ArgNamespace)) //avoid duplicates
+                {
+                    sb_namespaceList.AppendLine($"using {argInfo.ArgNamespace};");
+                }
+                
                 if (argCount < argsList.Length)
                 {
+                    sb_definitions.Append(",");
+                    sb_argList.Append(",");
                     sb_typeList.Append(",");
                 }
 
@@ -223,16 +228,18 @@ namespace EG.ScriptableObjectSystem.Editor
             result[0] = sb_definitions.ToString(); //Type1 arg1, Type2 arg2, Type3 arg3...
             result[1] = sb_argList.ToString(); //arg1, arg2, arg3...
             result[2] = sb_typeList.ToString(); //Type1,Type2,Type3...
+            result[3] = sb_namespaceList.ToString(); //using Custom.Namespace; ...
 
             return result;
         }
         
         private static string GetPathInProjectAssets(string fullPath)
         {
-            string[] splitPath = fullPath.Split(Path.DirectorySeparatorChar);
+            var splitPath = fullPath.Split(Path.DirectorySeparatorChar);
 
-            StringBuilder sb = new StringBuilder();
-            bool flag = false;
+            var sb = new StringBuilder();
+            var flag = false;
+            
             for (int i = 0; i < splitPath.Length; i++)
             {
                 if (splitPath[i] == "Assets")

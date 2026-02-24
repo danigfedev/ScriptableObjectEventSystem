@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 <CUSTOM_NAMESPACE_LIST>
-
 [CreateAssetMenu(fileName ="<SO_FILE_NAME>", menuName ="EspidiGames/SO Events/<SO_MENU_NAME>", order = 20)]
 public class <SCRIPT_NAME> : ScriptableObject
 {

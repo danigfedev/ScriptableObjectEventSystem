@@ -1,7 +1,6 @@
 using UnityEngine;
 using UnityEngine.Events;
 <CUSTOM_NAMESPACE_LIST>
-
 public class <SCRIPT_NAME> : MonoBehaviour
 {
     [System.Serializable]
