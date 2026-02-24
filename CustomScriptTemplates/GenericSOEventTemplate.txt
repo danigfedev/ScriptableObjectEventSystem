@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+<CUSTOM_NAMESPACE_LIST>
 
 [CreateAssetMenu(fileName ="<SO_FILE_NAME>", menuName ="EspidiGames/SO Events/<SO_MENU_NAME>", order = 20)]
 public class <SCRIPT_NAME> : ScriptableObject
@@ -7,26 +8,26 @@ public class <SCRIPT_NAME> : ScriptableObject
     private List<<LISTENER_NAME>> listeners = new List<<LISTENER_NAME>>();
 
 
-    public void AddListener(<LISTENER_NAME> l)
+    public void AddListener(<LISTENER_NAME> listener)
     {
-        if (listeners.Contains(l))
+        if (listeners.Contains(listener))
         {
-            Debug.LogError($"[ScriptableObjectEvents] Listener {l.name} of GameObject {l.gameObject.name} already registered. Aborting registration.");
+            Debug.LogError($"[ScriptableObjectEvents] Listener {listener.name} of GameObject {listener.gameObject.name} already registered. Aborting registration.");
             return;
         }
 
-        listeners.Add(l);
+        listeners.Add(listener);
     }
 
-    public void RemoveListener(<LISTENER_NAME> l)
+    public void RemoveListener(<LISTENER_NAME> listener)
     {
-        if (!listeners.Contains(l))
+        if (!listeners.Contains(listener))
         {
-            Debug.LogError($"[ScriptableObjectEvents] Listener {l.name} of GameObject {l.gameObject.name} is not registered. Aborting removal.");
+            Debug.LogError($"[ScriptableObjectEvents] Listener {listener.name} of GameObject {listener.gameObject.name} is not registered. Aborting removal.");
             return;
         }
 
-        listeners.Remove(l);
+        listeners.Remove(listener);
     }
 
     public void RiseEvent(<ARGUMENT_LIST_DEFINITION>) //Type1 arg1, Type2 arg2, Type3 arg3...
