@@ -30,7 +30,6 @@ namespace EG.ScriptableObjectSystem.Editor
                 AssetDatabase.Refresh();
 
                 yield return null; //Wait just for one editor frame
-                // yield return new EditorWaitForSeconds(0.1f); // hardcoded waiting time
 
                 var monoImporter = AssetImporter.GetAtPath(scriptPath) as MonoImporter;
                 var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(_packageRelativePath + iconName);
@@ -242,7 +241,7 @@ namespace EG.ScriptableObjectSystem.Editor
             
             for (int i = 0; i < splitPath.Length; i++)
             {
-                if (splitPath[i] == "Assets")
+                if (splitPath[i] == "Assets" || splitPath[i] == "Packages")
                 {
                     flag = true;
                 }

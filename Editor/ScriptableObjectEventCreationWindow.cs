@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Linq;
 using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
@@ -10,7 +11,13 @@ namespace EG.ScriptableObjectSystem.Editor
         private const string EventSONamePattern = "{0}EventScriptableObject";
         private const string EventListenerNamePattern = "{0}EventListener";
         private const int MaxArgs = 3;
+        
+        private static Vector2 InitialWindowDimensions = new Vector2(300, 170);
+        private static float WindowArgHeightDelta = 50;
+        private static float WindowCustomArgHeightDelta = 40;
 
+        private static ScriptableObjectEventCreationWindow _window;
+        
         private ArgInfo[] _argList = new ArgInfo[0];
         private string _eventName = "";
         private string _eventSOName;
@@ -22,13 +29,9 @@ namespace EG.ScriptableObjectSystem.Editor
         public static void OpenWindow()
         {
             //Calling this opens window normally (non-modal)
-            var window = GetWindow<ScriptableObjectEventCreationWindow>(true, "Select Randomized Selected Objects");
-
-            var windowDimensions = new Vector2(300, 400);
-            window.minSize = windowDimensions;
-            window.maxSize = windowDimensions;
-
-            EditorCoroutineUtility.StartCoroutineOwnerless(window.MakeWindowModal());
+            _window = GetWindow<ScriptableObjectEventCreationWindow>(true, "Select Randomized Selected Objects");
+            SetWindowSize(InitialWindowDimensions);
+            EditorCoroutineUtility.StartCoroutineOwnerless(_window.MakeWindowModal());
         }
 
         /// <summary>
@@ -46,12 +49,12 @@ namespace EG.ScriptableObjectSystem.Editor
 
         private void OnGUI()
         {
+            EditorGUILayout.Space();
             RenderEventNameSection();
-            EditorGUILayout.Space(20);
+            EditorGUILayout.Space();
             RenderArgumentsSelectorSection();
-            EditorGUILayout.Space(20);
-            RenderOutputFilesSection();
             GUILayout.FlexibleSpace();
+            RenderOutputFilesSection();
             RenderCreateAssetsButton();
         }
         
@@ -59,7 +62,7 @@ namespace EG.ScriptableObjectSystem.Editor
         {
             Repaint();
         }
-
+        
         private void RenderEventNameSection()
         {
             _eventName = EditorGUILayout.TextField("Event name:", _eventName);
@@ -77,14 +80,18 @@ namespace EG.ScriptableObjectSystem.Editor
             
             for(int argIndex = 0; argIndex < _argCount; argIndex++)
             {
+                GUILayout.Space(10);
                 RenderArgumentSelector(argIndex);
             }
+            
+            AdjustWindowHeight();
         }
 
         private void RenderArgumentSelector(int argIndex)
         {
             _argList[argIndex] ??= ArgInfo.CreateStandardArg();
-                
+
+            GUILayout.Label($"Argument {argIndex + 1}", EditorStyles.boldLabel);
             var newType = (EventSupportedArgs)EditorGUILayout.EnumPopup("Argument Type", _argList[argIndex].SupportedType);
             
             string newCustomType = null;
@@ -130,9 +137,24 @@ namespace EG.ScriptableObjectSystem.Editor
             if (GUILayout.Button("Create SO event scripts"))
             {
                 AssetCreationMenu.CreateSOEventScripts(_eventSOName, _eventListenerName, _argList);
-
                 Close();
             }
+        }
+        
+        private void AdjustWindowHeight()
+        {
+            var customArgCount = _argList.Where(arg => arg.SupportedType == EventSupportedArgs.Custom).Count();
+            var argsDeltaHeight = WindowArgHeightDelta * _argCount;
+            var rotalDeltaHeight = argsDeltaHeight + WindowCustomArgHeightDelta * customArgCount;
+            
+            var newWindowSize = InitialWindowDimensions + Vector2.up * rotalDeltaHeight;
+            SetWindowSize(newWindowSize);
+        }
+        
+        private static void SetWindowSize(Vector2 windowDimensions)
+        {
+            _window.minSize = windowDimensions;
+            _window.maxSize = windowDimensions;
         }
     }
 }
