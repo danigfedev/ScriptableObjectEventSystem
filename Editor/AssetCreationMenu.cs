@@ -22,15 +22,16 @@ namespace EG.ScriptableObjectSystem.Editor
         private const string NoArgsSOEventListenerTemplatePath = "/CustomScriptTemplates/NoArgsSOEventListenerTemplate.txt";
         
         private static string _packageRelativePath;
+        private static UnityEditor.PackageManager.PackageInfo _packageInfo;
         
-        private class IconReplacementClass : UnityEditor.Editor
+        private class EditorAssetIconReplacer : UnityEditor.Editor
         {
             public IEnumerator AddIcon(string scriptPath, string iconName)
             {
                 AssetDatabase.Refresh();
 
                 yield return null; //Wait just for one editor frame
-
+                
                 var monoImporter = AssetImporter.GetAtPath(scriptPath) as MonoImporter;
                 var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(_packageRelativePath + iconName);
                 monoImporter.SetIcon(icon);
@@ -41,7 +42,7 @@ namespace EG.ScriptableObjectSystem.Editor
         [MenuItem("Assets/Create/EspidiGames/SO Events/So Event Creation Window", false, 0)]
         static void OpenScriptableObjectEventCreationWindow()
         {
-            SetPackageName();
+            SetPackageData();
             ScriptableObjectEventCreationWindow.OpenWindow();
         }
 
@@ -126,7 +127,7 @@ namespace EG.ScriptableObjectSystem.Editor
 
             //5-Add Custom Icon:
             var filePathInProject = GetPathInProjectAssets(filePath);
-            var iconClass = new IconReplacementClass();
+            var iconClass = new EditorAssetIconReplacer();
             EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, EventIconRelativepath));
         }
 
@@ -172,7 +173,7 @@ namespace EG.ScriptableObjectSystem.Editor
 
             //5-Add Custom Icon:
             var filePathInProject = GetPathInProjectAssets(filePath);
-            var iconClass = new IconReplacementClass();
+            var iconClass = new EditorAssetIconReplacer();
             EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, EventListenerIconRelativePath));
         }
 
@@ -234,6 +235,9 @@ namespace EG.ScriptableObjectSystem.Editor
         
         private static string GetPathInProjectAssets(string fullPath)
         {
+            const string AssetsFolder = "Assets";
+            const string PackagesFolder = "Packages";
+            
             var splitPath = fullPath.Split(Path.DirectorySeparatorChar);
 
             var sb = new StringBuilder();
@@ -241,7 +245,7 @@ namespace EG.ScriptableObjectSystem.Editor
             
             for (int i = 0; i < splitPath.Length; i++)
             {
-                if (splitPath[i] == "Assets" || splitPath[i] == "Packages")
+                if (splitPath[i] == AssetsFolder || splitPath[i] == PackagesFolder)
                 {
                     flag = true;
                 }
@@ -256,13 +260,21 @@ namespace EG.ScriptableObjectSystem.Editor
                 }
             }
 
-            return sb.ToString();
+            var path = sb.ToString();
+            
+            if (path.StartsWith(PackagesFolder))
+            {
+                path = path.Replace(_packageInfo.displayName, _packageInfo.name);
+            }
+
+            return path;
         }
         
-        private static void SetPackageName()
+        private static void SetPackageData()
         {
             var assembly = typeof(AssetCreationMenu).Assembly;
             var packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssembly(assembly);
+            _packageInfo = UnityEditor.PackageManager.PackageInfo.FindForAssembly(assembly);
             _packageRelativePath = string.Format(PackageRelativePathPattern, packageInfo.name);
         }
     }   
