@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 
+<NAMESPACE_DECLARATION_START>
 public class <SCRIPT_NAME> : MonoBehaviour
 {
     [SerializeField] private <SO_EVENT_NAME> <SO_EVENT_FIELD_NAME>;
@@ -20,5 +21,5 @@ public class <SCRIPT_NAME> : MonoBehaviour
     {
         response.Invoke();
     }
-
 }
+<NAMESPACE_DECLARATION_END>
