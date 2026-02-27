@@ -22,7 +22,7 @@ This repo stores a custom Scriptable Object Event System, configured as a Unity 
 
 4 - A modal window will open. Select the options of your SO Event and hit "Create SO event scripts"
 
-<img width="771" height="1044" alt="Captura de pantalla 2026-02-27 161521" src="https://github.com/user-attachments/assets/5b20de60-c23a-414b-b07d-1b7ae3cda14a" />
+<img width="300" alt="Captura de pantalla 2026-02-27 161900" src="https://github.com/user-attachments/assets/a5bf67a0-4c57-4d9d-b880-241ac22359c5" />
 
 5 - Wait for script creation. After a few seconds, two scripts will appear on your selected directory.
 
