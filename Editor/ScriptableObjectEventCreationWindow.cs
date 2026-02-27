@@ -12,7 +12,7 @@ namespace EG.ScriptableObjectSystem.Editor
         private const string EventListenerNamePattern = "{0}EventListener";
         private const int MaxArgs = 3;
         
-        private static Vector2 InitialWindowDimensions = new Vector2(300, 170);
+        private static Vector2 InitialWindowDimensions = new Vector2(300, 190);
         private static float WindowArgHeightDelta = 50;
         private static float WindowCustomArgHeightDelta = 40;
 
@@ -20,6 +20,7 @@ namespace EG.ScriptableObjectSystem.Editor
         
         private ArgInfo[] _argList = new ArgInfo[0];
         private string _eventName = "";
+        private string _namespace;
         private string _eventSOName;
         private string _eventListenerName;
         private int _argCount = 0;
@@ -50,7 +51,7 @@ namespace EG.ScriptableObjectSystem.Editor
         private void OnGUI()
         {
             EditorGUILayout.Space();
-            RenderEventNameSection();
+            RenderEventNameAndNamespaceSection();
             EditorGUILayout.Space();
             RenderArgumentsSelectorSection();
             GUILayout.FlexibleSpace();
@@ -63,9 +64,10 @@ namespace EG.ScriptableObjectSystem.Editor
             Repaint();
         }
         
-        private void RenderEventNameSection()
+        private void RenderEventNameAndNamespaceSection()
         {
             _eventName = EditorGUILayout.TextField("Event name:", _eventName);
+            _namespace = EditorGUILayout.TextField("Namespace (Optional):", _namespace);
         }
 
         private void RenderArgumentsSelectorSection()
@@ -136,7 +138,7 @@ namespace EG.ScriptableObjectSystem.Editor
         {
             if (GUILayout.Button("Create SO event scripts"))
             {
-                AssetCreationMenu.CreateSOEventScripts(_eventSOName, _eventListenerName, _argList);
+                AssetCreationMenu.CreateSOEventScripts(_eventSOName, _eventListenerName, _namespace, _argList);
                 Close();
             }
         }

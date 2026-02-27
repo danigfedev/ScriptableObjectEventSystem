@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Events;
 <CUSTOM_NAMESPACE_LIST>
+<NAMESPACE_DECLARATION_START>
 public class <SCRIPT_NAME> : MonoBehaviour
 {
     [System.Serializable]
@@ -24,3 +25,4 @@ public class <SCRIPT_NAME> : MonoBehaviour
         response.Invoke(<ARGUMENT_LIST>); //arg1, arg2, arg3...
     }
 }
+<NAMESPACE_DECLARATION_END>

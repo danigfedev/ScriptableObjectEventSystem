@@ -1,9 +1,12 @@
+using System;
 using UnityEditor;
 using UnityEngine;
 using System.IO;
 using UnityEngine.Assertions;
 using System.Text;
 using System.Collections;
+using System.Linq;
+using System.Text.RegularExpressions;
 using Unity.EditorCoroutines.Editor;
 
 namespace EG.ScriptableObjectSystem.Editor
@@ -46,7 +49,7 @@ namespace EG.ScriptableObjectSystem.Editor
             ScriptableObjectEventCreationWindow.OpenWindow();
         }
 
-        public static void CreateSOEventScripts(string eventSOName, string eventListenerName, ArgInfo[] args)
+        public static void CreateSOEventScripts(string eventSOName, string eventListenerName, string eventNamespace, ArgInfo[] args)
         {
             //Picking the first one by default.
             //This will return the selected items' path, or the directory path, if no assets are selected
@@ -79,14 +82,14 @@ namespace EG.ScriptableObjectSystem.Editor
 
             var eventArgs = GenerateEventArguments(args);
 
-            CreateSOEventScript(creationPath, eventSOName, eventListenerName, eventArgs);
-            CreateSOEventListenerScript(creationPath, eventSOName, eventListenerName, eventArgs);
+            CreateSOEventScript(creationPath, eventSOName, eventListenerName, eventNamespace, eventArgs);
+            CreateSOEventListenerScript(creationPath, eventSOName, eventListenerName, eventNamespace, eventArgs);
 
             //Refresh the Asset Database
             AssetDatabase.Refresh();
         }
 
-        private static void CreateSOEventScript(string creationPath, string eventName, string listenerName, string[] argTypes)
+        private static void CreateSOEventScript(string creationPath, string eventName, string listenerName, string eventNamespace, string[] argTypes)
         {
             //1-Load template asset
             TextAsset soEventTemplate;
@@ -110,6 +113,9 @@ namespace EG.ScriptableObjectSystem.Editor
             contents = contents.Replace("<SCRIPT_NAME>", eventName);
             contents = contents.Replace("<SO_FILE_NAME>", eventName);
             contents = contents.Replace("<SO_MENU_NAME>", eventName);
+
+            contents = ReplaceNamespaceTag(eventNamespace, contents);
+            
             //Event order?
             contents = contents.Replace("<LISTENER_NAME>", listenerName);
             if(argTypes != null){
@@ -117,6 +123,8 @@ namespace EG.ScriptableObjectSystem.Editor
                 contents = contents.Replace("<ARGUMENT_LIST>", argTypes[1]);
                 contents = contents.Replace("<CUSTOM_NAMESPACE_LIST>", argTypes[3]);
             }
+            
+            contents = FinalizeIndent(contents);
 
             //4-Create file
             var filePath = creationPath + Path.DirectorySeparatorChar + eventName + ".cs";
@@ -131,7 +139,7 @@ namespace EG.ScriptableObjectSystem.Editor
             EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, EventIconRelativepath));
         }
 
-        private static void CreateSOEventListenerScript(string creationPath, string eventName, string listenerName, string[] argTypes)
+        private static void CreateSOEventListenerScript(string creationPath, string eventName, string listenerName, string eventNamespace, string[] argTypes)
         {
             //1-Load template asset
             TextAsset soEventListenerTemplate;
@@ -156,6 +164,9 @@ namespace EG.ScriptableObjectSystem.Editor
             contents = contents.Replace("<SCRIPT_NAME>", listenerName);
             contents = contents.Replace("<SO_EVENT_NAME>", eventName);
             contents = contents.Replace("<SO_EVENT_FIELD_NAME>", eventName.Replace("SO", "so"));
+            
+            contents = ReplaceNamespaceTag(eventNamespace, contents);
+
             if (argTypes != null)
             {
                 contents = contents.Replace("<ARGUMENT_LIST_DEFINITION>", argTypes[0]);
@@ -164,6 +175,8 @@ namespace EG.ScriptableObjectSystem.Editor
                 contents = contents.Replace("<CUSTOM_NAMESPACE_LIST>", argTypes[3]);
             }
 
+            contents = FinalizeIndent(contents);
+                
             //4-Create file
             var filePath = creationPath + Path.DirectorySeparatorChar + listenerName + ".cs";
             using (var sw = new StreamWriter(string.Format(filePath)))
@@ -175,6 +188,18 @@ namespace EG.ScriptableObjectSystem.Editor
             var filePathInProject = GetPathInProjectAssets(filePath);
             var iconClass = new EditorAssetIconReplacer();
             EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, EventListenerIconRelativePath));
+        }
+
+        private static string ReplaceNamespaceTag(string eventNamespace, string contents)
+        {
+            var nameSpaceOpening = string.IsNullOrWhiteSpace(eventNamespace) ? string.Empty : $"namespace {eventNamespace}\n{{\n";
+            var nameSpaceClosing = string.IsNullOrWhiteSpace(eventNamespace) ? string.Empty : "}";
+            
+            //Using regex so the extra line is removed without doing extra tricks or line by line checks
+            contents = Regex.Replace(contents, @"<NAMESPACE_DECLARATION_START>\n?\r?", nameSpaceOpening, RegexOptions.Multiline);
+            contents = contents.Replace("<NAMESPACE_DECLARATION_END>", nameSpaceClosing);
+            
+            return contents;
         }
 
         private static string[] GenerateEventArguments(ArgInfo[] argsList)
@@ -233,6 +258,43 @@ namespace EG.ScriptableObjectSystem.Editor
             return result;
         }
         
+        private static string FinalizeIndent(string rawCode, int spacesPerLevel = 4)
+        {
+            var lines = rawCode.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            var sb = new StringBuilder();
+            var currentLevel = 0;
+
+            foreach (string line in lines)
+            {
+                var trimmedLine = line.Trim();
+                
+                if (string.IsNullOrEmpty(trimmedLine))
+                {
+                    sb.AppendLine();
+                    continue;
+                }
+                
+                if (trimmedLine.StartsWith("}"))
+                {
+                    currentLevel = Math.Max(0, currentLevel - 1);
+                }
+                
+                var indentation = new string(' ', currentLevel * spacesPerLevel);
+                sb.AppendLine(indentation + trimmedLine);
+                
+                // if (trimmedLine.EndsWith("{") || trimmedLine.EndsWith("{ //") || trimmedLine.Contains("{"))
+                if (trimmedLine.EndsWith("{"))
+                {
+                    if (trimmedLine.Count(f => f == '{') > trimmedLine.Count(f => f == '}'))
+                    {
+                        currentLevel++;
+                    }
+                }
+            }
+
+            return sb.ToString().Trim();
+        }
+        
         private static string GetPathInProjectAssets(string fullPath)
         {
             const string AssetsFolder = "Assets";
@@ -269,7 +331,7 @@ namespace EG.ScriptableObjectSystem.Editor
 
             return path;
         }
-        
+
         private static void SetPackageData()
         {
             var assembly = typeof(AssetCreationMenu).Assembly;

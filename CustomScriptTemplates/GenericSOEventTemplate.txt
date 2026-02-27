@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 <CUSTOM_NAMESPACE_LIST>
+<NAMESPACE_DECLARATION_START>
 [CreateAssetMenu(fileName ="<SO_FILE_NAME>", menuName ="EspidiGames/SO Events/<SO_MENU_NAME>", order = 20)]
 public class <SCRIPT_NAME> : ScriptableObject
 {
     private List<<LISTENER_NAME>> listeners = new List<<LISTENER_NAME>>();
-
 
     public void AddListener(<LISTENER_NAME> listener)
     {
@@ -37,3 +37,4 @@ public class <SCRIPT_NAME> : ScriptableObject
         }
     }
 }
+<NAMESPACE_DECLARATION_END>
