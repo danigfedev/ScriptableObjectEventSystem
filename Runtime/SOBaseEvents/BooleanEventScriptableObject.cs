@@ -8,7 +8,6 @@ namespace SOBaseEvents
     {
         private List<BooleanEventListener> listeners = new List<BooleanEventListener>();
 
-
         public void AddListener(BooleanEventListener listener)
         {
             if (listeners.Contains(listener))

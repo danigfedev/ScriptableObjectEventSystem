@@ -1,26 +1,29 @@
 using UnityEngine;
 using UnityEngine.Events;
 
-public class StringEventListener : MonoBehaviour
+namespace SOBaseEvents
 {
-    [System.Serializable]
-    public class CustomUnityEvent : UnityEvent<string> { } //ARGUMENT_TYPE_LIST -> Type1, Type2, Type3...
-
-    [SerializeField] private StringEventScriptableObject StringEventScriptableObject;
-    [SerializeField] private CustomUnityEvent response;
-
-    void OnEnable()
+    public class StringEventListener : MonoBehaviour
     {
-        StringEventScriptableObject.AddListener(this);
-    }
+        [System.Serializable]
+        public class CustomUnityEvent : UnityEvent<string> { } //ARGUMENT_TYPE_LIST -> Type1, Type2, Type3...
 
-    void OnDisable()
-    {
-        StringEventScriptableObject.RemoveListener(this);
-    }
+        [SerializeField] private StringEventScriptableObject StringEventScriptableObject;
+        [SerializeField] private CustomUnityEvent response;
 
-    public void RiseEvent(string arg1) //Type1 arg1, Type2 arg2, Type3 arg3...
-    {
-        response.Invoke(arg1); //arg1, arg2, arg3...
+        void OnEnable()
+        {
+            StringEventScriptableObject.AddListener(this);
+        }
+
+        void OnDisable()
+        {
+            StringEventScriptableObject.RemoveListener(this);
+        }
+
+        public void RiseEvent(string arg1) //Type1 arg1, Type2 arg2, Type3 arg3...
+        {
+            response.Invoke(arg1); //arg1, arg2, arg3...
+        }
     }
 }

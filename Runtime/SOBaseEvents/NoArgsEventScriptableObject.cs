@@ -1,38 +1,41 @@
 using System.Collections.Generic;
 using UnityEngine;
-[CreateAssetMenu(fileName ="NoArgsEventScriptableObject", menuName ="EspidiGames/SO Events/NoArgsEventScriptableObject", order = 20)]
-public class NoArgsEventScriptableObject : ScriptableObject
+
+namespace SOBaseEvents
 {
-    private List<NoArgsEventListener> listeners = new List<NoArgsEventListener>();
-
-
-    public void AddListener(NoArgsEventListener listener)
+    [CreateAssetMenu(fileName ="NoArgsEventScriptableObject", menuName ="EspidiGames/SO Events/NoArgsEventScriptableObject", order = 20)]
+    public class NoArgsEventScriptableObject : ScriptableObject
     {
-        if (listeners.Contains(listener))
+        private List<NoArgsEventListener> listeners = new List<NoArgsEventListener>();
+
+        public void AddListener(NoArgsEventListener listener)
         {
-            Debug.LogError($"[ScriptableObjectEvents] Listener {listener.name} of GameObject {listener.gameObject.name} already registered. Aborting registration.");
-            return;
+            if (listeners.Contains(listener))
+            {
+                Debug.LogError($"[ScriptableObjectEvents] Listener {listener.name} of GameObject {listener.gameObject.name} already registered. Aborting registration.");
+                return;
+            }
+
+            listeners.Add(listener);
         }
 
-        listeners.Add(listener);
-    }
-
-    public void RemoveListener(NoArgsEventListener listener)
-    {
-        if (!listeners.Contains(listener))
+        public void RemoveListener(NoArgsEventListener listener)
         {
-            Debug.LogError($"[ScriptableObjectEvents] Listener {listener.name} of GameObject {listener.gameObject.name} is not registered. Aborting removal.");
-            return;
+            if (!listeners.Contains(listener))
+            {
+                Debug.LogError($"[ScriptableObjectEvents] Listener {listener.name} of GameObject {listener.gameObject.name} is not registered. Aborting removal.");
+                return;
+            }
+
+            listeners.Remove(listener);
         }
 
-        listeners.Remove(listener);
-    }
-
-    public void RiseEvent()
-    {
-        foreach(var listener in listeners)
+        public void RiseEvent()
         {
-            listener.RiseEvent();
+            foreach(var listener in listeners)
+            {
+                listener.RiseEvent();
+            }
         }
     }
 }

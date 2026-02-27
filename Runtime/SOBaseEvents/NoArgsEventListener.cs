@@ -1,22 +1,26 @@
 using UnityEngine;
 using UnityEngine.Events;
-public class NoArgsEventListener : MonoBehaviour
+
+namespace SOBaseEvents
 {
-    [SerializeField] private NoArgsEventScriptableObject NoArgsEventScriptableObject;
-    [SerializeField] private UnityEvent response;
-
-    void OnEnable()
+    public class NoArgsEventListener : MonoBehaviour
     {
-        NoArgsEventScriptableObject.AddListener(this);
-    }
+        [SerializeField] private NoArgsEventScriptableObject NoArgsEventScriptableObject;
+        [SerializeField] private UnityEvent response;
 
-    void OnDisable()
-    {
-        NoArgsEventScriptableObject.RemoveListener(this);
-    }
+        void OnEnable()
+        {
+            NoArgsEventScriptableObject.AddListener(this);
+        }
 
-    public void RiseEvent()
-    {
-        response.Invoke();
+        void OnDisable()
+        {
+            NoArgsEventScriptableObject.RemoveListener(this);
+        }
+
+        public void RiseEvent()
+        {
+            response.Invoke();
+        }
     }
 }
