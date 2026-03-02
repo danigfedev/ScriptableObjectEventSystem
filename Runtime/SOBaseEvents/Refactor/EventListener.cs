@@ -1,12 +1,13 @@
 ﻿using System;
-using SOBaseEvents.Refactor.Impl;
 using UnityEngine;
 
 namespace SOBaseEvents.Refactor
 {
-    public abstract class EventListener<TEvent, TArg> : EventListenerBase where TEvent : EventSOBase<TArg>
+    public abstract class EventListener<TEvent, TArg> : MonoBehaviour where TEvent : class, ISOEventRegistry<TArg>
     {
         public event Action<TArg> OnEventRaised;
+        
+        [SerializeField] protected ScriptableObject _baseEvent;  
         
         protected TEvent _typedEvent => _baseEvent as TEvent;
 
