@@ -1,5 +1,5 @@
 using System;
-using SOBaseEvents.Refactor;
+using SOBaseEvents;
 using UnityEditor;
 
 namespace Editor.EditorUI

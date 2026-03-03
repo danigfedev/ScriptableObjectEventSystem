@@ -1,0 +1,9 @@
+using UnityEngine;
+<CUSTOM_NAMESPACE_LIST>
+<NAMESPACE_DECLARATION_START>
+[CreateAssetMenu(fileName ="<SO_FILE_NAME>", menuName ="EspidiGames/SO Events/<SO_MENU_NAME>", order = 20)]
+public class <SCRIPT_NAME> : EventSOBase<ARGUMENT_TYPE_LIST>
+{
+    
+}
+<NAMESPACE_DECLARATION_END>

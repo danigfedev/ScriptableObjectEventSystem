@@ -1,6 +1,6 @@
-using SOBaseEvents.Refactor;
 using UnityEditor;
 using System;
+using SOBaseEvents;
 
 namespace Editor.EditorUI
 {
