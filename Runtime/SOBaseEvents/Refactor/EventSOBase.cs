@@ -4,6 +4,60 @@ using UnityEngine;
 
 namespace SOBaseEvents.Refactor
 {
+    public abstract class EventSOBase : ScriptableObject, ISOEventBase, ISOEventRegistry, ISOEventRaiser
+    {
+        private readonly List<Action> _listeners = new();
+        
+        public void AddListener(Action listener)
+        {
+            if (_listeners.Contains(listener))
+            {
+                var (objectName, methodName) = GetListenerInfo(listener);
+                Debug.LogError($"[ScriptableObjectEvents] Listener {methodName} of GameObject {objectName} already registered. Aborting registration.");
+                return;
+            }
+            
+            _listeners.Add(listener);
+        }
+
+        public void RemoveListener(Action listener)
+        {
+            if (!_listeners.Contains(listener))
+            {
+                var (objectName, methodName) = GetListenerInfo(listener);
+                Debug.LogError($"[ScriptableObjectEvents] Listener {methodName} of GameObject {objectName} is not registered. Aborting removal.");
+                return;
+            }
+
+            _listeners.Remove(listener);
+        }
+
+        public void RaiseEvent()
+        {
+            for (int i = _listeners.Count - 1; i >= 0; i--)
+            {
+                _listeners[i]?.Invoke();
+            }
+        }
+        
+        private (string objectName, string methodName) GetListenerInfo(Action listener)
+        {
+            var objectName = string.Empty;
+            var methodName = listener.Method.Name;
+                
+            if (listener.Target is MonoBehaviour mb)
+            {
+                objectName = mb.gameObject.name;
+            }
+            else if (listener.Target != null)
+            {
+                objectName = listener.Target.ToString();
+            }
+
+            return (objectName, methodName);
+        }
+    }
+    
     public abstract class EventSOBase<TArg> : ScriptableObject, ISOEventBase, ISOEventRegistry<TArg>, ISOEventRaiser<TArg>
     {
         private readonly List<Action<TArg>> _listeners = new();
