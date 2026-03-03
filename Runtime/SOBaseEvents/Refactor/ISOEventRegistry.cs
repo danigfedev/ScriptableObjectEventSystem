@@ -14,6 +14,15 @@ namespace SOBaseEvents.Refactor
         void RemoveListener(Action<TEventArg> listener);
     }
     
-    //TODO Research more than one Argument support
-    //public interface IEventRegistry<TEventArg1, TEventArg2, TEventArg3>
+    public interface ISOEventRegistry<TEventArg1, TEventArg2>
+    {
+        void AddListener(Action<TEventArg1, TEventArg2> listener);
+        void RemoveListener(Action<TEventArg1, TEventArg2> listener);
+    }
+    
+    public interface ISOEventRegistry<TEventArg1, TEventArg2, TEventArg3>
+    {
+        void AddListener(Action<TEventArg1, TEventArg2, TEventArg3> listener);
+        void RemoveListener(Action<TEventArg1, TEventArg2, TEventArg3> listener);
+    }
 }

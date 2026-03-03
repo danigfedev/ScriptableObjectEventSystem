@@ -10,5 +10,13 @@
         void RaiseEvent(TEventArg arg);
     }
     
-    //TODO Research more than one Argument support
+    public interface ISOEventRaiser<TEventArg1, TEventArg2>
+    {
+        void RaiseEvent(TEventArg1 arg1, TEventArg2 arg2);
+    }
+    
+    public interface ISOEventRaiser<TEventArg1, TEventArg2, TEventArg3>
+    {
+        void RaiseEvent(TEventArg1 arg1, TEventArg2 arg2, TEventArg3 arg3);
+    }
 }

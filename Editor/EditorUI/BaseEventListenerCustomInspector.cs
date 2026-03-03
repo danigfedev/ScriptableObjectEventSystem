@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Editor.EditorUI
 {
-    public class BaseEventListenerCustomInspector : UnityEditor.Editor
+    public abstract class BaseEventListenerCustomInspector : UnityEditor.Editor
     {
         protected const string EventSOVariableName = "_baseEvent";
         
@@ -18,8 +18,6 @@ namespace Editor.EditorUI
         protected void DrawEventInspector(string label, string tooltip, Func<UnityEngine.Object, bool> validationLogic)
         {
             serializedObject.Update();
-            // EditorGUILayout.Space();
-            // EditorGUILayout.LabelField("Event Configuration", EditorStyles.boldLabel);
 
             EditorGUI.BeginChangeCheck();
             var newObj = EditorGUILayout.ObjectField(new GUIContent(label, tooltip), _baseEventProp.objectReferenceValue, typeof(ScriptableObject), false);
@@ -40,5 +38,7 @@ namespace Editor.EditorUI
             DrawPropertiesExcluding(serializedObject, "m_Script", EventSOVariableName);
             serializedObject.ApplyModifiedProperties();
         }
+
+        protected abstract bool ValidationLogic(System.Object obj);
     }
 }

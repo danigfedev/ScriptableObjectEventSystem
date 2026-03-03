@@ -1,13 +1,12 @@
-﻿using System;
 using SOBaseEvents.Refactor;
 using UnityEditor;
-using Object = UnityEngine.Object;
+using System;
 
 namespace Editor.EditorUI
 {
-    [CustomEditor(typeof(EventListener<,>), true)]
+    [CustomEditor(typeof(EventListener<,,>), true)]
     [CanEditMultipleObjects]
-    public class EventListenerWithArgCustomInspector : BaseEventListenerCustomInspector
+    public class EventListener2ArgCustomInspector : BaseEventListenerCustomInspector
     {
         Type _tArg;
         
@@ -16,7 +15,7 @@ namespace Editor.EditorUI
             base.OnEnable();
             var type = target.GetType();
 
-            while (type != null && (!type.IsGenericType || type.GetGenericTypeDefinition() != typeof(EventListener<,>)))
+            while (type != null && (!type.IsGenericType || type.GetGenericTypeDefinition() != typeof(EventListener<,,>)))
             {
                 type = type.BaseType;
             }
@@ -34,9 +33,9 @@ namespace Editor.EditorUI
                 obj => ValidationLogic(obj));
         }
 
-        private bool ValidationLogic(Object obj)
+        protected override bool ValidationLogic(Object obj)
         {
-            var registryInterface = typeof(ISOEventRegistry<>).MakeGenericType(_tArg);
+            var registryInterface = typeof(ISOEventRegistry<,>).MakeGenericType(_tArg);
             return obj is ISOEventBase && registryInterface.IsAssignableFrom(obj.GetType());
         }
     }

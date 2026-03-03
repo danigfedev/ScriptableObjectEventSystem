@@ -15,7 +15,7 @@ namespace Editor.EditorUI
                 obj => ValidationLogic(obj));
         }
 
-        private bool ValidationLogic(Object obj)
+        protected override bool ValidationLogic(Object obj)
         {
             return obj is ISOEventBase && obj is ISOEventRegistry;
         }
