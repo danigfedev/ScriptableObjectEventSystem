@@ -8,7 +8,8 @@ namespace Editor.EditorUI
     [CanEditMultipleObjects]
     public class EventListener2ArgCustomInspector : BaseEventListenerCustomInspector
     {
-        Type _tArg;
+        Type[] _tArgs;
+        private string _types;
         
         private void OnEnable()
         {
@@ -20,23 +21,35 @@ namespace Editor.EditorUI
                 type = type.BaseType;
             }
 
-            if (type != null)
-            {
-                _tArg = type.GetGenericArguments()[1];
-            }
+            GetArgTypes(type);
         }
         
         public override void OnInspectorGUI()
         {
             DrawEventInspector("Event Asset",
-                $"Must implement ISOEventRegistry<{(_tArg != null ? _tArg.Name : "T")}>",
-                obj => ValidationLogic(obj));
+                $"Must implement ISOEventRegistry<{(_tArgs != null ? _types : "T")}>",
+                obj => ValidateEventType(obj));
         }
 
-        protected override bool ValidationLogic(Object obj)
+        protected override bool ValidateEventType(Object obj)
         {
-            var registryInterface = typeof(ISOEventRegistry<,>).MakeGenericType(_tArg);
-            return obj is ISOEventBase && registryInterface.IsAssignableFrom(obj.GetType());
+            if (!(obj is ISOEventBase))
+            {
+                return false;
+            }
+
+            var objType = obj.GetType();
+            var argsValidated = false;
+            
+            foreach (var iface in objType.GetInterfaces())
+            {
+                if (iface.IsGenericType && iface.GetGenericTypeDefinition() == typeof(ISOEventRegistry<,>))
+                {
+                    argsValidated |= ValidateArgCountAndTypes(iface);
+                }
+            }
+            
+            return argsValidated;
         }
     }
 }

@@ -1,3 +1,4 @@
+using SOBaseEvents;
 using UnityEngine;
 <CUSTOM_NAMESPACE_LIST>
 <NAMESPACE_DECLARATION_START>

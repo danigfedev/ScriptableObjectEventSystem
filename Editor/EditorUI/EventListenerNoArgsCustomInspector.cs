@@ -6,16 +6,16 @@ namespace Editor.EditorUI
 {
     [CustomEditor(typeof(EventListener<>), true)]
     [CanEditMultipleObjects]
-    public class EventListenerCustomInspector : BaseEventListenerCustomInspector
+    public class EventListenerNoArgsCustomInspector : BaseEventListenerCustomInspector
     {
         public override void OnInspectorGUI()
         {
             DrawEventInspector("Event Asset (Void)",
                 "Must implement ISOEventRegistry",
-                obj => ValidationLogic(obj));
+                obj => ValidateEventType(obj));
         }
 
-        protected override bool ValidationLogic(Object obj)
+        protected override bool ValidateEventType(Object obj)
         {
             return obj is ISOEventBase && obj is ISOEventRegistry;
         }
