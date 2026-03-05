@@ -20,8 +20,8 @@ public class EventSystemAuditor : EditorWindow
         public string ComponentTypeName;
         public Object Context; // Para hacer ping al componente exacto
     }
-
-    [MenuItem("Tools/SO Event System Auditor")]
+    
+    [MenuItem("EspidiGames/SO Events/SO Event System Auditor")]
     public static void ShowWindow() => GetWindow<EventSystemAuditor>("Event Auditor");
 
     private void OnEnable() => RefreshEventList();
