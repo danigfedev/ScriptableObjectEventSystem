@@ -2,7 +2,7 @@
   "name": "com.espidigames.scriptable-object-event-system",
   "displayName": "EG-Scriptable Object Event System",
   "description": "Editor system that automatizes Scriptable Object Event creation",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "unity": "2021.3",
   "repository": {
     "type": "git",
