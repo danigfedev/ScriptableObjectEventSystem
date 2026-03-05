@@ -15,7 +15,7 @@ namespace SOBaseEvents
         {
             if (_typedEvent != null)
             {
-                _typedEvent.AddListener(OnEventRaised);
+                _typedEvent.AddListener(OnEventRaiseRequested);
             }
         }
 
@@ -23,8 +23,13 @@ namespace SOBaseEvents
         {
             if (_typedEvent != null)
             {
-                _typedEvent.RemoveListener(OnEventRaised);
+                _typedEvent.RemoveListener(OnEventRaiseRequested);
             }
+        }
+
+        private void OnEventRaiseRequested()
+        {
+            OnEventRaised?.Invoke();
         }
     }
     
@@ -40,7 +45,7 @@ namespace SOBaseEvents
         {
             if (_typedEvent != null)
             {
-                _typedEvent.AddListener(OnEventRaised);
+                _typedEvent.AddListener(OnEventRaiseRequested);
             }
         }
 
@@ -48,8 +53,13 @@ namespace SOBaseEvents
         {
             if (_typedEvent != null)
             {
-                _typedEvent.RemoveListener(OnEventRaised);
+                _typedEvent.RemoveListener(OnEventRaiseRequested);
             }
+        }
+        
+        private void OnEventRaiseRequested(TArg value)
+        {
+            OnEventRaised?.Invoke(value);
         }
     }
     
@@ -65,7 +75,7 @@ namespace SOBaseEvents
         {
             if (_typedEvent != null)
             {
-                _typedEvent.AddListener(OnEventRaised);
+                _typedEvent.AddListener(OnEventRaiseRequested);
             }
         }
 
@@ -73,8 +83,13 @@ namespace SOBaseEvents
         {
             if (_typedEvent != null)
             {
-                _typedEvent.RemoveListener(OnEventRaised);
+                _typedEvent.RemoveListener(OnEventRaiseRequested);
             }
+        }
+        
+        private void OnEventRaiseRequested(TArg1 value1, TArg2 value2)
+        {
+            OnEventRaised?.Invoke(value1, value2);
         }
     }
     
@@ -90,7 +105,7 @@ namespace SOBaseEvents
         {
             if (_typedEvent != null)
             {
-                _typedEvent.AddListener(OnEventRaised);
+                _typedEvent.AddListener(OnEventRaiseRequested);
             }
         }
 
@@ -98,8 +113,13 @@ namespace SOBaseEvents
         {
             if (_typedEvent != null)
             {
-                _typedEvent.RemoveListener(OnEventRaised);
+                _typedEvent.RemoveListener(OnEventRaiseRequested);
             }
+        }
+
+        private void OnEventRaiseRequested(TArg1 value1, TArg2 value2, TArg3 value3)
+        {
+            OnEventRaised?.Invoke(value1, value2, value3);
         }
     }
 }
