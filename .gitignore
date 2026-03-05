@@ -1,1 +1,6 @@
 README.md.meta
+
+#These override the global git settings (we exclude all files ended with ~, typically used by backup files)
+!Samples~/
+!Documentation~/
+!Tests~/
