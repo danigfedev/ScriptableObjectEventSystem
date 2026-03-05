@@ -2,7 +2,7 @@
   "name": "com.espidigames.scriptable-object-event-system",
   "displayName": "EG-Scriptable Object Event System",
   "description": "Editor system that automatizes Scriptable Object Event creation",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "unity": "2021.3",
   "repository": {
     "type": "git",
@@ -20,5 +20,12 @@
     "so",
     "scriptableobject",
     "events"
+  ],
+  "samples": [
+    {
+      "displayName": "Event System Usage Sample",
+      "description": "Basic scene with examples on how to use the Scriptable Object Event System",
+      "path": "Samples/EventSystemUsageSample"
+    }
   ]
 }
