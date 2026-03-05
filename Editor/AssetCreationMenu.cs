@@ -18,11 +18,8 @@ namespace EG.ScriptableObjectSystem.Editor
         private const string EventIconRelativepath = "/Icons/event.png";
         private const string EventListenerIconRelativePath = "/Icons/listener.png";
 
-        private const string GenericSOEventTemplatePath = "/CustomScriptTemplates/GenericSOEventTemplate.txt";
-        private const string NoArgsSOEventTemplatePath = "/CustomScriptTemplates/NoArgsSOEventTemplate.txt";
-
-        private const string GenericSOEventListenerTemplatePath = "/CustomScriptTemplates/GenericSOEventListenerTemplate.txt";
-        private const string NoArgsSOEventListenerTemplatePath = "/CustomScriptTemplates/NoArgsSOEventListenerTemplate.txt";
+        private const string GenericSOEventTemplatePath = "/CustomScriptTemplates/SOEventTemplate.txt";
+        private const string GenericSOEventListenerTemplatePath = "/CustomScriptTemplates/SOEventListenerTemplate.txt";
         
         private static string _packageRelativePath;
         private static UnityEditor.PackageManager.PackageInfo _packageInfo;
@@ -92,17 +89,8 @@ namespace EG.ScriptableObjectSystem.Editor
         private static void CreateSOEventScript(string creationPath, string eventName, string listenerName, string eventNamespace, string[] argTypes)
         {
             //1-Load template asset
-            TextAsset soEventTemplate;
-            if (argTypes!= null)
-            {
-                soEventTemplate = AssetDatabase.LoadAssetAtPath(_packageRelativePath 
-                    + GenericSOEventTemplatePath, typeof(TextAsset)) as TextAsset;
-            }
-            else
-            {
-                soEventTemplate = AssetDatabase.LoadAssetAtPath(_packageRelativePath 
-                    + NoArgsSOEventTemplatePath, typeof(TextAsset)) as TextAsset;
-            }
+            var soEventTemplate = AssetDatabase.LoadAssetAtPath(_packageRelativePath
+                                                                + GenericSOEventTemplatePath, typeof(TextAsset)) as TextAsset;
 
             //2-Check loaded object validity. If not valid, abort execution
             Assert.IsTrue(soEventTemplate != null, "[AssetCreation] SOEventTemplate loading failed. Aborting");
@@ -116,12 +104,14 @@ namespace EG.ScriptableObjectSystem.Editor
 
             contents = ReplaceNamespaceTag(eventNamespace, contents);
             
-            //Event order?
-            contents = contents.Replace("<LISTENER_NAME>", listenerName);
             if(argTypes != null){
-                contents = contents.Replace("<ARGUMENT_LIST_DEFINITION>", argTypes[0]);
-                contents = contents.Replace("<ARGUMENT_LIST>", argTypes[1]);
                 contents = contents.Replace("<CUSTOM_NAMESPACE_LIST>", argTypes[3]);
+                contents = contents.Replace("<ARGUMENT_TYPE_LIST>", $"<{argTypes[2]}>");
+            }
+            else
+            {
+                contents = contents.Replace("<CUSTOM_NAMESPACE_LIST>", string.Empty);
+                contents = contents.Replace("<ARGUMENT_TYPE_LIST>", string.Empty);
             }
             
             contents = FinalizeIndent(contents);
@@ -142,18 +132,8 @@ namespace EG.ScriptableObjectSystem.Editor
         private static void CreateSOEventListenerScript(string creationPath, string eventName, string listenerName, string eventNamespace, string[] argTypes)
         {
             //1-Load template asset
-            TextAsset soEventListenerTemplate;
-            if (argTypes != null)
-            {
-                soEventListenerTemplate = AssetDatabase.LoadAssetAtPath(_packageRelativePath 
-                    + GenericSOEventListenerTemplatePath, typeof(TextAsset)) as TextAsset;
-
-            }
-            else
-            {
-                soEventListenerTemplate = AssetDatabase.LoadAssetAtPath(_packageRelativePath 
-                    + NoArgsSOEventListenerTemplatePath, typeof(TextAsset)) as TextAsset;
-            }
+            var soEventListenerTemplate = AssetDatabase.LoadAssetAtPath(_packageRelativePath
+                                                                        + GenericSOEventListenerTemplatePath, typeof(TextAsset)) as TextAsset;
 
             //2-Check loaded object validity. If not valid, abort execution
             Assert.IsTrue(soEventListenerTemplate != null, "[AssetCreation] SOEventTemplate loading failed. Aborting");
@@ -163,16 +143,18 @@ namespace EG.ScriptableObjectSystem.Editor
 
             contents = contents.Replace("<SCRIPT_NAME>", listenerName);
             contents = contents.Replace("<SO_EVENT_NAME>", eventName);
-            contents = contents.Replace("<SO_EVENT_FIELD_NAME>", eventName.Replace("SO", "so"));
             
             contents = ReplaceNamespaceTag(eventNamespace, contents);
 
             if (argTypes != null)
             {
-                contents = contents.Replace("<ARGUMENT_LIST_DEFINITION>", argTypes[0]);
-                contents = contents.Replace("<ARGUMENT_LIST>", argTypes[1]);
-                contents = contents.Replace("<ARGUMENT_TYPE_LIST>", argTypes[2]);
                 contents = contents.Replace("<CUSTOM_NAMESPACE_LIST>", argTypes[3]);
+                contents = contents.Replace("<ARGUMENT_TYPE_LIST>", $", {argTypes[2]}");
+            }
+            else
+            {
+                contents = contents.Replace("<CUSTOM_NAMESPACE_LIST>", string.Empty);
+                contents = contents.Replace("<ARGUMENT_TYPE_LIST>", string.Empty);
             }
 
             contents = FinalizeIndent(contents);
@@ -242,9 +224,9 @@ namespace EG.ScriptableObjectSystem.Editor
                 
                 if (argCount < argsList.Length)
                 {
-                    sb_definitions.Append(",");
-                    sb_argList.Append(",");
-                    sb_typeList.Append(",");
+                    sb_definitions.Append(", ");
+                    sb_argList.Append(", ");
+                    sb_typeList.Append(", ");
                 }
 
                 argCount++;
