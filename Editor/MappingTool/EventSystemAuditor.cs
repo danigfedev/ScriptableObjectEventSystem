@@ -7,15 +7,15 @@ using SOBaseEvents;
 
 public class EventSystemAuditor : EditorWindow
 {
+    private const string PrefabExtension = ".prefab";
+    private const string SceneExtension = ".unity";
+    
     private Vector2 _scrollPos;
     private List<ScriptableObject> _allProjectEvents = new List<ScriptableObject>();
-    
-    // State management for UI expansion
-    private Dictionary<ScriptableObject, bool> _expansionStates = new Dictionary<ScriptableObject, bool>();
-    
-    // Master data: Event -> Asset Path -> List of specific usages
+    private Dictionary<ScriptableObject, bool> _expandedStates = new Dictionary<ScriptableObject, bool>();
     private Dictionary<ScriptableObject, Dictionary<string, List<UsageDetail>>> _masterResults = 
         new Dictionary<ScriptableObject, Dictionary<string, List<UsageDetail>>>();
+    private GUIStyle _headerStyle;
 
     private struct UsageDetail
     {
@@ -24,85 +24,105 @@ public class EventSystemAuditor : EditorWindow
         public Object Context; // Reference to ping the specific component
     }
 
-    [MenuItem("Tools/SO Event System Auditor")]
-    public static void ShowWindow() => GetWindow<EventSystemAuditor>("Event Auditor");
+    [MenuItem("EspidiGames/SO Events/SO Event System Auditor")]
+    public static void ShowWindow()
+    {
+        GetWindow<EventSystemAuditor>("Event Auditor");
+    }
 
-    private void OnEnable() => RefreshAndScanAll();
+    private void OnEnable()
+    {
+        GetWindow<EventSystemAuditor>("Event Auditor");
+        RefreshAndScanAll();
+    }
 
     private void OnGUI()
     {
-        // --- TOP TOOLBAR ---
+        RenderTopToolBar();
+        RenderResultsSection();
+    }
+    
+    private void RenderTopToolBar()
+    {
         EditorGUILayout.BeginHorizontal(EditorStyles.toolbar);
-        if (GUILayout.Button("Refresh & Scan Project", EditorStyles.toolbarButton)) RefreshAndScanAll();
-        GUILayout.FlexibleSpace();
         
-        if (GUILayout.Button("Expand All", EditorStyles.toolbarButton)) SetAllExpansion(true);
-        if (GUILayout.Button("Collapse All", EditorStyles.toolbarButton)) SetAllExpansion(false);
-        EditorGUILayout.EndHorizontal();
+        if (GUILayout.Button("Refresh & Scan Project", EditorStyles.toolbarButton))
+        {
+            RefreshAndScanAll();
+        }
+        
+        GUILayout.FlexibleSpace();
 
+        if (GUILayout.Button("Expand All", EditorStyles.toolbarButton))
+        {
+            SetEventUsagesExpandedState(true);
+        }
+
+        if (GUILayout.Button("Collapse All", EditorStyles.toolbarButton))
+        {
+            SetEventUsagesExpandedState(false);
+        }
+        
+        EditorGUILayout.EndHorizontal();
+    }
+
+    private void RenderResultsSection()
+    {
         _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
 
         if (_allProjectEvents.Count == 0)
         {
-            EditorGUILayout.HelpBox("No ScriptableObjects implementing ISOEventBase were found in the project.", MessageType.Info);
+            EditorGUILayout.HelpBox("No ScriptableObjects implementing ISOEventBase were found in the project.",
+                MessageType.Info);
         }
 
-        foreach (var ev in _allProjectEvents)
+        foreach (var soEvent in _allProjectEvents)
         {
-            RenderEventGroup(ev);
+            RenderSOEventsUsages(soEvent);
         }
 
         EditorGUILayout.EndScrollView();
     }
-
-    private void RenderEventGroup(ScriptableObject ev)
+    
+    private void RenderSOEventsUsages(ScriptableObject soEvent)
     {
         // Default to expanded if state not found
-        if (!_expansionStates.ContainsKey(ev)) _expansionStates[ev] = true;
-        bool expanded = _expansionStates[ev];
-
-        // Custom Header Style
-        GUIStyle headerStyle = new GUIStyle(EditorStyles.miniButtonMid);
-        headerStyle.alignment = TextAnchor.MiddleLeft;
-        headerStyle.fontStyle = FontStyle.Bold;
-        headerStyle.fontSize = 11;
-        headerStyle.fixedHeight = 25;
+        if (!_expandedStates.ContainsKey(soEvent))
+        {
+            _expandedStates[soEvent] = true;
+        }
+        
+        var expanded = _expandedStates[soEvent];
+        _headerStyle ??= CreateHeaderStyle();
 
         // Visual Feedback: Highlight background if expanded
-        if (expanded) GUI.backgroundColor = new Color(0.8f, 0.9f, 1f); 
+        if (expanded)
+        {
+            GUI.backgroundColor = new Color(0.8f, 0.9f, 1f);
+        } 
 
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         
-        // Toggle Button
-        string arrow = expanded ? "▼" : "▶";
-        if (GUILayout.Button($" {arrow}  {ev.name.ToUpper()} [{ev.GetType().Name}]", headerStyle))
-        {
-            _expansionStates[ev] = !expanded;
-        }
+        RenderScriptableObjectEventEntryHeaderToggle(soEvent, expanded);
         GUI.backgroundColor = Color.white;
 
         if (expanded)
         {
             EditorGUILayout.Space(2);
-            if (_masterResults.ContainsKey(ev) && _masterResults[ev].Count > 0)
+            if (_masterResults.ContainsKey(soEvent) && _masterResults[soEvent].Count > 0)
             {
-                foreach (var assetEntry in _masterResults[ev])
+                foreach (var assetEntry in _masterResults[soEvent])
                 {
                     // Group by Asset (Prefab/Scene)
                     EditorGUILayout.BeginVertical(EditorStyles.textArea);
+                    
                     GUILayout.Label($"📂 {System.IO.Path.GetFileName(assetEntry.Key)}", EditorStyles.boldLabel);
                     
                     foreach (var detail in assetEntry.Value)
                     {
-                        EditorGUILayout.BeginHorizontal();
-                        GUILayout.Space(15);
-                        // Deep link to component
-                        if (GUILayout.Button($"   # GO: {detail.GameObjectName} ({detail.ComponentTypeName})", EditorStyles.label))
-                        {
-                            EditorGUIUtility.PingObject(detail.Context);
-                        }
-                        EditorGUILayout.EndHorizontal();
+                        RenderSOEventUsage(detail);
                     }
+                    
                     EditorGUILayout.EndVertical();
                     EditorGUILayout.Space(1);
                 }
@@ -117,55 +137,110 @@ public class EventSystemAuditor : EditorWindow
         EditorGUILayout.Space(2);
     }
 
-    private void SetAllExpansion(bool state)
+    private static GUIStyle CreateHeaderStyle()
     {
-        var keys = _expansionStates.Keys.ToList();
-        foreach (var key in keys) _expansionStates[key] = state;
+        var headerStyle = new GUIStyle(EditorStyles.miniButtonMid);
+        headerStyle.alignment = TextAnchor.MiddleLeft;
+        headerStyle.fontStyle = FontStyle.Bold;
+        headerStyle.fontSize = 11;
+        headerStyle.fixedHeight = 25;
+
+        return headerStyle;
+    }
+    
+    private void RenderScriptableObjectEventEntryHeaderToggle(ScriptableObject soEvent, bool expanded)
+    {
+        var arrow = expanded ? "▼" : "▶";
+        if (GUILayout.Button($" {arrow}  {soEvent.name.ToUpper()} [{soEvent.GetType().Name}]", _headerStyle))
+        {
+            _expandedStates[soEvent] = !expanded;
+        }
+    }
+    
+    private static void RenderSOEventUsage(UsageDetail detail)
+    {
+        EditorGUILayout.BeginHorizontal();
+        GUILayout.Space(15);
+        // Deep link to component
+        if (GUILayout.Button($"   # GO: {detail.GameObjectName} ({detail.ComponentTypeName})", EditorStyles.label))
+        {
+            EditorGUIUtility.PingObject(detail.Context);
+        }
+        EditorGUILayout.EndHorizontal();
     }
 
-    // --- SCAN LOGIC ---
+    private void SetEventUsagesExpandedState(bool expand)
+    {
+        var keys = _expandedStates.Keys.ToList();
+        
+        foreach (var key in keys)
+        {
+            _expandedStates[key] = expand;
+        }
+    }
 
+    #region === Asset scanning logic ===
+    
     private void RefreshAndScanAll()
     {
         _allProjectEvents.Clear();
         _masterResults.Clear();
+        
+        FindAllScriptableObjectEventAssets();
+        ScanDependencies();
+    }
 
-        // 1. Find all relevant SOs in project
-        string[] guids = AssetDatabase.FindAssets("t:ScriptableObject");
+    private void FindAllScriptableObjectEventAssets()
+    {
+        var guids = AssetDatabase.FindAssets("t:ScriptableObject");
+
         foreach (var guid in guids)
         {
-            string path = AssetDatabase.GUIDToAssetPath(guid);
-            var so = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
-            if (so is ISOEventBase)
+            var path = AssetDatabase.GUIDToAssetPath(guid);
+            var scriptableObjectAsset = AssetDatabase.LoadAssetAtPath<ScriptableObject>(path);
+            
+            if (scriptableObjectAsset is ISOEventBase)
             {
-                _allProjectEvents.Add(so);
-                _masterResults[so] = new Dictionary<string, List<UsageDetail>>();
-                if (!_expansionStates.ContainsKey(so)) _expansionStates[so] = true;
-            }
-        }
-
-        // 2. Perform deep dependency scan
-        string[] potentialAssets = AssetDatabase.FindAssets("t:Prefab t:Scene");
-        foreach (var guid in potentialAssets)
-        {
-            string assetPath = AssetDatabase.GUIDToAssetPath(guid);
-            string[] deps = AssetDatabase.GetDependencies(assetPath);
-
-            foreach (var ev in _allProjectEvents)
-            {
-                if (deps.Contains(AssetDatabase.GetAssetPath(ev)))
+                _allProjectEvents.Add(scriptableObjectAsset);
+                _masterResults[scriptableObjectAsset] = new Dictionary<string, List<UsageDetail>>();
+                if (!_expandedStates.ContainsKey(scriptableObjectAsset))
                 {
-                    if (assetPath.EndsWith(".prefab")) ScanPrefab(assetPath, ev);
-                    else if (assetPath.EndsWith(".unity")) ScanScene(assetPath, ev);
+                    _expandedStates[scriptableObjectAsset] = true;
                 }
             }
         }
     }
 
+    private void ScanDependencies()
+    {
+        var potentialAssets = AssetDatabase.FindAssets("t:Prefab t:Scene");
+        foreach (var guid in potentialAssets)
+        {
+            var assetPath = AssetDatabase.GUIDToAssetPath(guid);
+            var dependencies = AssetDatabase.GetDependencies(assetPath);
+
+            foreach (var soEvent in _allProjectEvents)
+            {
+                if (dependencies.Contains(AssetDatabase.GetAssetPath(soEvent)))
+                {
+                    if (assetPath.EndsWith(PrefabExtension))
+                    {
+                        ScanPrefab(assetPath, soEvent);
+                    }
+                    else if (assetPath.EndsWith(SceneExtension))
+                    {
+                        ScanScene(assetPath, soEvent);
+                    }
+                }
+            }
+        }
+    }
+    
     private void ScanPrefab(string path, ScriptableObject target)
     {
-        GameObject root = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-        CheckComponents(path, root.GetComponentsInChildren<Component>(true), target);
+        var root = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+        var allComponents = root.GetComponentsInChildren<Component>(true);
+        CheckComponents(path, allComponents, target);
     }
 
     private void ScanScene(string path, ScriptableObject target)
@@ -179,29 +254,36 @@ public class EventSystemAuditor : EditorWindow
 
     private void CheckComponents(string assetPath, IEnumerable<Component> components, ScriptableObject target)
     {
-        foreach (var comp in components)
+        foreach (var component in components)
         {
-            if (comp == null) continue;
+            if (component == null)
+            {
+                continue;
+            }
             
             // Iterate through all serialized properties to find the SO reference
-            SerializedObject so = new SerializedObject(comp);
-            SerializedProperty prop = so.GetIterator();
+            var serializedObject = new SerializedObject(component);
+            var property = serializedObject.GetIterator();
 
-            while (prop.NextVisible(true))
+            while (property.NextVisible(true))
             {
-                if (prop.propertyType == SerializedPropertyType.ObjectReference && prop.objectReferenceValue == target)
+                if (property.propertyType == SerializedPropertyType.ObjectReference && property.objectReferenceValue == target)
                 {
-                    if (!_masterResults[target].ContainsKey(assetPath)) 
+                    if (!_masterResults[target].ContainsKey(assetPath))
+                    {
                         _masterResults[target][assetPath] = new List<UsageDetail>();
+                    }
                     
                     _masterResults[target][assetPath].Add(new UsageDetail {
-                        GameObjectName = comp.gameObject.name,
-                        ComponentTypeName = comp.GetType().Name,
-                        Context = comp
+                        GameObjectName = component.gameObject.name,
+                        ComponentTypeName = component.GetType().Name,
+                        Context = component
                     });
                     break;
                 }
             }
         }
     }
+    
+    #endregion
 }
