@@ -13,9 +13,6 @@
     "email": "danigfe.dev@gmail.com",
     "url": "https://github.com/danigfedev"
   },
-  "dependencies": {
-    "com.unity.editorcoroutines": "1.0.0"
-  },
   "keywords": [
     "so",
     "scriptableobject",
