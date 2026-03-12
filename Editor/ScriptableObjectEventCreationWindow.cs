@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Linq;
-using Unity.EditorCoroutines.Editor;
 using UnityEditor;
 using UnityEngine;
 
@@ -29,25 +27,17 @@ namespace EG.ScriptableObjectSystem.Editor
         
         public static void OpenWindow()
         {
-            //Calling this opens window normally (non-modal)
             _window = GetWindow<ScriptableObjectEventCreationWindow>(true, "Select Randomized Selected Objects");
             SetWindowSize(InitialWindowDimensions);
-            EditorCoroutineUtility.StartCoroutineOwnerless(_window.MakeWindowModal());
+
+            EditorApplication.delayCall += MakeWindowModal;
+            void MakeWindowModal()
+            {
+                EditorApplication.delayCall -= MakeWindowModal;
+                _window.ShowModalUtility();
+            }
         }
-
-        /// <summary>
-        /// Coroutine that skips one editor frame and then makes Window modal.
-        /// Necessary to open window from Project panel (right click -> Create/EspidiGames/SO Events / Open window)
-        ///For whatever reason, opening from that context menu left the window completely blank
-        /// (it was working from unity menus though))
-        /// </summary>
-        private IEnumerator MakeWindowModal()
-        {
-            yield return null; //Wait just for one editor frame
-
-            this.ShowModalUtility();
-        }
-
+        
         private void OnGUI()
         {
             EditorGUILayout.Space();

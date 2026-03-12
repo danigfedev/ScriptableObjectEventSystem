@@ -4,10 +4,8 @@ using UnityEngine;
 using System.IO;
 using UnityEngine.Assertions;
 using System.Text;
-using System.Collections;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Unity.EditorCoroutines.Editor;
 
 namespace EG.ScriptableObjectSystem.Editor
 {
@@ -26,16 +24,20 @@ namespace EG.ScriptableObjectSystem.Editor
         
         private class EditorAssetIconReplacer : UnityEditor.Editor
         {
-            public IEnumerator AddIcon(string scriptPath, string iconName)
+            public void EditScriptIcon(string scriptPath, string iconName)
             {
+                EditorApplication.delayCall += EditScriptIconInternal;
                 AssetDatabase.Refresh();
-
-                yield return null; //Wait just for one editor frame
                 
-                var monoImporter = AssetImporter.GetAtPath(scriptPath) as MonoImporter;
-                var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(_packageRelativePath + iconName);
-                monoImporter.SetIcon(icon);
-                monoImporter.SaveAndReimport();
+                void EditScriptIconInternal()
+                {
+                    EditorApplication.delayCall -= EditScriptIconInternal;
+                    
+                    var monoImporter = AssetImporter.GetAtPath(scriptPath) as MonoImporter;
+                    var icon = AssetDatabase.LoadAssetAtPath<Texture2D>(_packageRelativePath + iconName);
+                    monoImporter.SetIcon(icon);
+                    monoImporter.SaveAndReimport();
+                }
             }
         }
 
@@ -126,7 +128,7 @@ namespace EG.ScriptableObjectSystem.Editor
             //5-Add Custom Icon:
             var filePathInProject = GetPathInProjectAssets(filePath);
             var iconClass = new EditorAssetIconReplacer();
-            EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, EventIconRelativepath));
+            iconClass.EditScriptIcon(filePathInProject, EventIconRelativepath);
         }
 
         private static void CreateSOEventListenerScript(string creationPath, string eventName, string listenerName, string eventNamespace, string[] argTypes)
@@ -169,7 +171,7 @@ namespace EG.ScriptableObjectSystem.Editor
             //5-Add Custom Icon:
             var filePathInProject = GetPathInProjectAssets(filePath);
             var iconClass = new EditorAssetIconReplacer();
-            EditorCoroutineUtility.StartCoroutineOwnerless(iconClass.AddIcon(filePathInProject, EventListenerIconRelativePath));
+            iconClass.EditScriptIcon(filePathInProject, EventListenerIconRelativePath);
         }
 
         private static string ReplaceNamespaceTag(string eventNamespace, string contents)
